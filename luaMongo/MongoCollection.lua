@@ -16,6 +16,10 @@ limitations under the License.
 
 --]]
 
+ObjectId = require("ObjectId")
+BSONNull = require("BSONNull")
+InsertOneResult = require("InsertOneResult")
+
 local MongoCollection = {__mode="k"}
 MongoCollection.__index = MongoCollection
 
@@ -33,6 +37,23 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:drop()
 		ret = self.collection_t:collection_drop()
 		return ret
+	end
+	
+	function MongoCollection:find_one(query, fields)
+		return self.collection_t:collection_find_one(query, fields)
+	end
+	
+	function MongoCollection:insert_one(doc)
+		return self.collection_t:collection_insert_one(doc)
+	end
+	
+	-- Converts Lua table to BSON string and prints it in C layer in JSON.
+	function MongoCollection:convertLuaTableToBSON(table)
+		self.collection_t:convert_lua_table_to_bson(table)
+	end
+	
+	function MongoCollection:makeRandomObjectId()
+		return self.collection_t:make_random_object_id()
 	end
 	
 return MongoCollection

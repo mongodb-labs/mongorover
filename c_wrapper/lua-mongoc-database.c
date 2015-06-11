@@ -19,7 +19,8 @@
 
 
 int
-lua_mongo_database_new(lua_State *L) {
+lua_mongo_database_new(lua_State *L)
+{
     const char* database_name;
     client_t *client;
     mongoc_client_t *c_client;
@@ -41,8 +42,10 @@ lua_mongo_database_new(lua_State *L) {
     return 1;
 }
 
+
 int
-lua_mongo_database_get_collection_names (lua_State *L) {
+lua_mongo_database_get_collection_names (lua_State *L)
+{
     database_t *database;
     int num_collections;
     char **collection_names;
@@ -68,8 +71,10 @@ lua_mongo_database_get_collection_names (lua_State *L) {
     return 1;
 }
 
+
 int
-lua_mongo_database_drop (lua_State *L) {
+lua_mongo_database_drop (lua_State *L)
+{
     database_t *database;
     bson_error_t error;
     bool ret;
@@ -85,8 +90,10 @@ lua_mongo_database_drop (lua_State *L) {
     return 1;
 }
 
+
 int
-lua_mongo_database_has_collection (lua_State *L) {
+lua_mongo_database_has_collection (lua_State *L)
+{
     database_t *database;
     const char *database_name;
     bool has_collection;
@@ -103,8 +110,10 @@ lua_mongo_database_has_collection (lua_State *L) {
     return 1;
 }
 
+
 int
-lua_mongo_database_destroy (lua_State *L) {
+lua_mongo_database_destroy (lua_State *L)
+{
     database_t *database;
     database = (database_t *)luaL_checkudata(L, 1, "lua_mongoc_database");
 

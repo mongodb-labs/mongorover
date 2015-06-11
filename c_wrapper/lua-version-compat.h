@@ -19,7 +19,11 @@
 
 #include "lua-mongoc-wrapper.h"
 
-void setfuncs_compat(lua_State *L, const struct luaL_Reg *R, char *name_for_lua51);
-void newlib_compat(lua_State *L, const struct luaL_Reg *R, char *name_for_lua51);
+void setfuncs_compat(lua_State *L,
+                     const struct luaL_Reg *R,
+                     char *name_for_lua51);
+void newlib_compat(lua_State *L,
+                   const struct luaL_Reg *R,
+                   char *name_for_lua51);
 
 #endif //LUA_VERSION_COMPAT_H

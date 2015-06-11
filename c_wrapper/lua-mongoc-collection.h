@@ -20,12 +20,16 @@
 #include "lua-mongoc-database.h"
 #include "lua-mongoc-wrapper.h"
 
-int lua_mongo_collection_new(lua_State *L);
+int lua_mongo_collection_new (lua_State *L);
 int lua_mongo_collection_drop (lua_State *L);
-int lua_mongo_collection_destroy(lua_State *L);
+int lua_mongo_collection_find_one (lua_State *L);
+int lua_mongo_collection_insert_one (lua_State *L);
+int lua_mongo_collection_destroy (lua_State *L);
 
 static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_drop", lua_mongo_collection_drop },
+    { "collection_find_one", lua_mongo_collection_find_one },
+    { "collection_insert_one", lua_mongo_collection_insert_one },
     { "__gc", lua_mongo_collection_destroy },
     { NULL, NULL },
 };

@@ -19,11 +19,11 @@
 
 #include "lua-mongoc-wrapper.h"
 
-int                         lua_mongo_database_new                              (lua_State *L);
-int                         lua_mongo_database_get_collection_names             (lua_State *L);
-int                         lua_mongo_database_has_collection                   (lua_State *L);
-int                         lua_mongo_database_destroy                          (lua_State *L);
-int                         lua_mongo_database_drop                             (lua_State *L);
+int lua_mongo_database_new (lua_State *L);
+int lua_mongo_database_get_collection_names (lua_State *L);
+int lua_mongo_database_has_collection (lua_State *L);
+int lua_mongo_database_destroy (lua_State *L);
+int lua_mongo_database_drop (lua_State *L);
 
 static const struct luaL_Reg lua_mongoc_database_methods[] = {
     { "get_collection_names", lua_mongo_database_get_collection_names },
