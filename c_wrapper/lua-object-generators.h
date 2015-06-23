@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-#include "lua-version-compat.h"
+#ifndef MONGO_MODULE_LUA_OBJECT_GENERATORS_H
+#define MONGO_MODULE_LUA_OBJECT_GENERATORS_H
+
 #include "lua-mongoc-wrapper.h"
 
-void
-setfuncs_compat(lua_State *L,
-                const struct luaL_Reg *R,
-                char *name_for_lua51) {
+void generate_ObjectID(lua_State *L, char *str);
+bool is_ObjectId(lua_State *L);
+void generate_BSONNull(lua_State *L);
+bool is_BSONNull(lua_State *L);
 
-#if LUA_VERSION_NUM >= 502
-    luaL_setfuncs(L, R, 0);
-#else
-    lua_setglobal(L, name_for_lua51);
-    luaL_register(L, name_for_lua51, R);
-#endif
-}
-
-void
-newlib_compat(lua_State *L,
-              const struct luaL_Reg *R,
-              char *name_for_lua51) {
-
-#if LUA_VERSION_NUM >= 502
-    luaL_newlib(L, R);
-#else
-    luaopen_base(L);
-    luaL_register(L, name_for_lua51, R);
-#endif
-}
+#endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H

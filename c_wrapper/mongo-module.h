@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef LUA_MONGO_MODULE_H
+#define LUA_MONGO_MODULE_H
 
+#include "lua-bson.h"
 #include "lua-mongoc-client.h"
 #include "lua-mongoc-collection.h"
 #include "lua-mongoc-database.h"
@@ -26,7 +29,9 @@ static const struct luaL_Reg mongo_module_methods[] = {
 
 static const struct luaL_Reg mongo_module_functions[] = {
     { "client_new", lua_mongo_client_new },
-    { "database_new", lua_mongo_database_new },
     { "collection_new", lua_mongo_collection_new },
+    { "database_new", lua_mongo_database_new },
     { NULL,  NULL }
 };
+
+#endif LUA_MONGO_MODULE_H
