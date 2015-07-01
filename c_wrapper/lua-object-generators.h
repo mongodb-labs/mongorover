@@ -43,4 +43,9 @@ bool generate_InsertManyResult(lua_State *L,
                                int num_elements,
                                bson_error_t *error);
 
+bool generate_DeleteResult(lua_State *L,
+                           bson_t *raw_result,
+                           bool acknowledged,
+                           bson_error_t *error);
+
 #endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H

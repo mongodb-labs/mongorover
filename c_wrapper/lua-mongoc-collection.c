@@ -443,6 +443,108 @@ DONE:
 }
 
 int
+lua_mongo_collection_delete_one(lua_State *L)
+{
+    collection_t *collection;
+    bson_t selector = BSON_INITIALIZER;
+    mongoc_bulk_operation_t *bulk_remove = NULL;
+    bson_error_t error;
+    bson_t reply;
+    bool throw_error = false;
+    bool ret;
+
+    collection = (collection_t *)luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+    if ((lua_istable(L, 2))) {
+        if (!(lua_table_to_bson(L, &selector, 2, false, &error))) {
+            throw_error = true;
+            goto DONE;
+        }
+    } else {
+        luaL_error(L, "second input must be a table");
+    }
+
+    bulk_remove = mongoc_collection_create_bulk_operation(collection->c_collection,
+                                                          true, NULL);
+
+    mongoc_bulk_operation_remove_one(bulk_remove, &selector);
+
+    ret = mongoc_bulk_operation_execute(bulk_remove, &reply, &error);
+    if (!(ret)) {
+        throw_error = true;
+        goto DONE;
+    }
+
+    if (!(generate_DeleteResult(L, &reply, ret, &error))) {
+        throw_error = true;
+        goto DONE;
+    }
+
+DONE:
+    bson_destroy(&selector);
+    if (bulk_remove) {
+        mongoc_bulk_operation_destroy (bulk_remove);
+    }
+
+    if (throw_error) {
+        luaL_error(L, error.message);
+    }
+
+    return 1;
+}
+
+int
+lua_mongo_collection_delete_many(lua_State *L)
+{
+    collection_t *collection;
+    bson_t selector = BSON_INITIALIZER;
+    mongoc_bulk_operation_t *bulk_remove = NULL;
+    bson_error_t error;
+    bson_t reply;
+    bool throw_error = false;
+    bool ret;
+
+    collection = (collection_t *)luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+    if ((lua_istable(L, 2))) {
+        if (!(lua_table_to_bson(L, &selector, 2, false, &error))) {
+            throw_error = true;
+            goto DONE;
+        }
+    } else {
+        luaL_error(L, "second input must be a table");
+    }
+
+    bulk_remove = mongoc_collection_create_bulk_operation(collection->c_collection,
+                                                          true, NULL);
+
+    mongoc_bulk_operation_remove(bulk_remove, &selector);
+
+    ret = mongoc_bulk_operation_execute(bulk_remove, &reply, &error);
+    if (!(ret)) {
+        throw_error = true;
+        goto DONE;
+    }
+
+    if (!(generate_DeleteResult(L, &reply, ret, &error))) {
+        throw_error = true;
+        goto DONE;
+    }
+
+    DONE:
+    bson_destroy(&selector);
+    if (bulk_remove) {
+        mongoc_bulk_operation_destroy (bulk_remove);
+    }
+
+    if (throw_error) {
+        luaL_error(L, error.message);
+    }
+
+    return 1;
+}
+
+int
 lua_mongo_collection_destroy (lua_State *L)
 {
     collection_t *collection;

@@ -83,6 +83,14 @@ MongoCollection.__index = MongoCollection
 		return self.collection_t:collection_insert_many(docs, ordered)
 	end
 	
+	function MongoCollection:delete_one(selector)
+		return self.collection_t:collection_delete_one(selector)
+	end
+	
+	function MongoCollection:delete_many(selector)
+		return self.collection_t:collection_delete_many(selector)
+	end
+	
 	function MongoCollection:makeRandomObjectId()
 		return self.collection_t:make_random_object_id()
 	end
