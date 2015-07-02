@@ -54,6 +54,14 @@ luaopen_mongo_module(lua_State *L)
     setfuncs_compat(L, lua_mongoc_collection_methods, "lua_mongoc_collection");
     newlib_compat(L, lua_mongoc_collection_functions, "lua_mongoc_collection");
 
+    //initialize mongo_cursor
+    luaL_newmetatable(L, "lua_mongo_cursor");
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+
+    setfuncs_compat(L, lua_mongo_cursor_methods, "lua_mongo_cursor");
+    newlib_compat(L, lua_mongo_cursor_functions, "lua_mongo_cursor");
+
     //initialize mongo/main module
     luaL_newmetatable(L, "mongo_module");
     lua_pushvalue(L, -1);

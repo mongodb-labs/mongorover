@@ -48,7 +48,6 @@ TestClient = {}
 		status, err = pcall( func )
 		
 		if err then
-			
 			assert(err == -1, "client garbage collected before database was garbage collected")
 		end
 	end

@@ -39,17 +39,29 @@ MongoCollection.__index = MongoCollection
 		return ret
 	end
 	
+	function createCursorIterator (collection, mongoCursor)
+		local cursor_t = mongoCursor
+		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
+		-- Table has to have relevant information in it, to prevent gc.
+		local mongoCursorPointer = {collection = collection, cursor_t = mongoCursor}
+		setmetatable(mongoCursorPointer, {__mode = "k"})
+		
+		return function ()
+                       return mongoCursorPointer["cursor_t"]:next()
+                   end
+	end
+	
+	function MongoCollection:find(query, fields)
+		cursor_t = self.collection_t:collection_find(self, query, fields)
+		return createCursorIterator(self, cursor_t)
+	end
+	
 	function MongoCollection:find_one(query, fields)
 		return self.collection_t:collection_find_one(query, fields)
 	end
 	
 	function MongoCollection:insert_one(doc)
 		return self.collection_t:collection_insert_one(doc)
-	end
-	
-	-- Converts Lua table to BSON string and prints it in C layer in JSON.
-	function MongoCollection:convertLuaTableToBSON(table)
-		self.collection_t:convert_lua_table_to_bson(table)
 	end
 	
 	function MongoCollection:makeRandomObjectId()

@@ -16,7 +16,8 @@
 
 #include "lua-mongoc-client.h"
 
-int lua_mongo_client_new(lua_State *L) {
+int lua_mongo_client_new(lua_State *L)
+{
     client_t *client;
     const char *db_uri;
 
@@ -39,7 +40,8 @@ int lua_mongo_client_new(lua_State *L) {
 }
 
 int
-lua_mongo_client_get_database_names(lua_State *L) {
+lua_mongo_client_get_database_names(lua_State *L)
+{
     char** database_names;
     bson_error_t error;
     client_t *client;
@@ -66,7 +68,8 @@ lua_mongo_client_get_database_names(lua_State *L) {
 }
 
 int
-lua_mongo_client_destroy(lua_State *L) {
+lua_mongo_client_destroy(lua_State *L)
+{
     client_t *client;
 
     client = (client_t *)luaL_checkudata(L, 1, "lua_mongoc_client");

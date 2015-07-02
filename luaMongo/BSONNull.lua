@@ -6,7 +6,7 @@ BSONNull.__index = BSONNull
 	end
 	
 	function BSONNull:__eq(a, b)
-		return BSONNull.isBSONNull(a) and BSONNull.isBSONNull(b)
+		return BSONNull.isBSonNull(a) and BSONNull.isBSonNull(b)
 	end
 
 	--- Creates a MongoClient instance.
