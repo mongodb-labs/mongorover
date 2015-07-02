@@ -23,7 +23,6 @@ lua_mongo_database_new(lua_State *L)
 {
     const char* database_name;
     client_t *client;
-    mongoc_client_t *c_client;
     database_t *database;
 
     client = (client_t *)luaL_checkudata(L, 1, "lua_mongoc_client");

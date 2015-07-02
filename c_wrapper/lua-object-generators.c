@@ -24,8 +24,10 @@ generate_ObjectID(lua_State *L, char *str)
     lua_pushstring(L, str);
 
     // Make call using 1 argument and getting 1 result
-    if (lua_pcall(L, 1, 1, 0) != 0)
+    if (lua_pcall(L, 1, 1, 0) != 0) {
         luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
+    }
+
     // Remove global variable ObjectID off of the stack to maintain stack integrity
     lua_remove (L, -2);
 }
@@ -63,9 +65,12 @@ generate_BSONNull(lua_State *L)
 {
     lua_getglobal(L, "BSONNull");
     lua_getfield( L, -1, "new");
+
     // Make call using 0 arguments and getting 1 result
-    if (lua_pcall(L, 0, 1, 0) != 0)
+    if (lua_pcall(L, 0, 1, 0) != 0) {
         luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
+    }
+
     // Remove global variable BSONNull off of the stack to maintain stack integrity
     lua_remove (L, -2);
 }

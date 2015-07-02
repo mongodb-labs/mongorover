@@ -35,7 +35,6 @@ void lua_place_bson_field_value_on_top_of_stack(lua_State *L,
                                                 char *field);
 
 void bson_document_or_array_to_table(lua_State *L,
-                                     mongoc_cursor_t *cursor,
                                      bson_t *bson_doc,
                                      bool is_table);
 
