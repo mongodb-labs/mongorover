@@ -18,7 +18,8 @@ limitations under the License.
 
 ObjectId = require("ObjectId")
 BSONNull = require("BSONNull")
-InsertOneResult = require("InsertOneResult")
+InsertOneResult = require("resultObjects.InsertOneResult")
+UpdateOneResult = require("resultObjects.UpdateOneResult")
 
 local MongoCollection = {__mode="k"}
 MongoCollection.__index = MongoCollection
@@ -40,15 +41,19 @@ MongoCollection.__index = MongoCollection
 	end
 	
 	function createCursorIterator (collection, mongoCursor)
+		local fetch_one = nil
 		local cursor_t = mongoCursor
 		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
 		-- Table has to have relevant information in it, to prevent gc.
-		local mongoCursorPointer = {collection = collection, cursor_t = mongoCursor}
+		local mongoCursorPointer = {collection=collection, cursor_t=mongoCursor}
 		setmetatable(mongoCursorPointer, {__mode = "k"})
 		
 		return function ()
-                       return mongoCursorPointer["cursor_t"]:next()
-                   end
+			fetch_one = mongoCursorPointer["cursor_t"]:next()
+			   if fetch_one then
+				   return fetch_one
+				end
+			 end
 	end
 	
 	function MongoCollection:find(query, fields)
@@ -58,6 +63,12 @@ MongoCollection.__index = MongoCollection
 	
 	function MongoCollection:find_one(query, fields)
 		return self.collection_t:collection_find_one(query, fields)
+	end
+	
+	function MongoCollection:update_one(filter, update, upsert)
+		upsert = upsert or false
+		local raw_result = self.collection_t:collection_update_one(filter, update, upsert)
+		return UpdateOneResult.new(raw_result)
 	end
 	
 	function MongoCollection:insert_one(doc)

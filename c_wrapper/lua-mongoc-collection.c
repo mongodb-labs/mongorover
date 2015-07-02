@@ -93,41 +93,99 @@ lua_mongo_collection_find (lua_State *L)
 int
 lua_mongo_collection_find_one (lua_State *L)
 {
-    // TODO: make sure memory leaks are fixed the same way as 
-    // lua_mongo_collection_find.
     collection_t *collection;
-    bson_t *query;
-    bson_t *fields;
+    bson_t query = BSON_INITIALIZER;
+    bson_t fields = BSON_INITIALIZER;
     mongoc_cursor_t *cursor;
     const bson_t *doc;
+    int num_ret_vals;
+    bool throw_error = false;
+    bson_error_t error;
 
     collection = (collection_t *)luaL_checkudata(L, 1, "lua_mongoc_collection");
 
-    query = bson_new();
-    fields = bson_new();
-
     if (!(lua_isnil(L, 2))) {
-        lua_table_to_bson(L, query, 2, false);
+        lua_table_to_bson(L, &query, 2, false);
     }
 
     if (!(lua_isnil(L, 3))) {
-        lua_table_to_bson(L, fields, 3, false);
+        lua_table_to_bson(L, &fields, 3, false);
     }
 
     cursor = mongoc_collection_find (collection->c_collection,
                                      MONGOC_QUERY_NONE, 0, 0, -1,
-                                     query, fields, NULL);
+                                     &query, &fields, NULL);
 
-    if (mongoc_cursor_next (cursor, &doc)) {
-        bson_document_or_array_to_table (L, cursor, doc, true);
-        bson_destroy (query);
-        mongoc_cursor_destroy (cursor);
-        return 1;
+    if (!(mongoc_cursor_next (cursor, &doc))) {
+        throw_error = mongoc_cursor_error(cursor, &error);
+        if (throw_error) {
+            goto DONE;
+        } else {
+            // Cursor did not error, but did not have anything in it.
+            num_ret_vals = 0;
+        }
+    } else {
+        num_ret_vals = 1;
+        bson_document_or_array_to_table (L, doc, true);
     }
 
-    bson_destroy (query);
+    DONE:
+    bson_destroy (&query);
+    bson_destroy (&fields);
     mongoc_cursor_destroy (cursor);
-    return 0;
+
+    if (throw_error) {
+        luaL_error(L, error.message);
+    }
+
+    return num_ret_vals;
+}
+
+
+int
+lua_mongo_collection_update_one (lua_State *L)
+{
+    collection_t *collection;
+    bson_t filter = BSON_INITIALIZER;
+    bson_t update = BSON_INITIALIZER;
+    bool upsert;
+    bson_error_t error;
+    bool ret;
+    mongoc_bulk_operation_t *bulk_update;
+    bson_t reply;
+
+    collection = (collection_t *)luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+    if (!(lua_isnil(L, 2))) {
+        lua_table_to_bson(L, &filter, 2, false);
+    }
+
+    if (lua_isnil(L, 3)) {
+        luaL_error(L, "update parameters must be included");
+    } else {
+        lua_table_to_bson(L, &update, 3, false);
+    }
+
+    if((lua_isboolean(L, 4))) {
+        upsert = lua_toboolean(L, 4);
+    } else {
+        luaL_error(L, "upsert parameter must be a boolean");
+    }
+
+    bulk_update = mongoc_collection_create_bulk_operation
+            (collection->c_collection,
+            false, NULL);
+
+    mongoc_bulk_operation_update_one(bulk_update, &filter, &update, upsert);
+    ret = mongoc_bulk_operation_execute (bulk_update, &reply, &error);
+
+    if (!ret) {
+        luaL_error(L, "Error: %s\n", error.message);
+    }
+
+    bson_document_or_array_to_table(L, &reply, true);
+
+    return 1;
 }
 
 int
@@ -142,8 +200,7 @@ lua_mongo_collection_insert_one (lua_State *L)
 
     collection_t *collection;
     mongoc_bulk_operation_t *bulk_insert;
-    bson_t bson_doc;
-
+    bson_t bson_doc = BSON_INITIALIZER;
     bson_error_t error;
     bson_t reply;
     bool ret;
@@ -157,7 +214,6 @@ lua_mongo_collection_insert_one (lua_State *L)
         luaL_error(L, "second input must be a table");
     }
 
-    bson_init(&bson_doc);
     lua_table_to_bson(L, &bson_doc, 2, true);
 
     mongoc_bulk_operation_insert(bulk_insert, &bson_doc);

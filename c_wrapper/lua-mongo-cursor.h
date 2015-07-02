@@ -23,6 +23,7 @@
 void lua_mongo_cursor_new(lua_State *L, mongoc_cursor_t *cursor);
 int lua_mongo_cursor_iterate(lua_State *L);
 int lua_mongo_cursor_destroy(lua_State *L);
+//int lua_mongo_cursor_destroy(lua_State *L);
 
 static const struct luaL_Reg lua_mongo_cursor_methods[] = {
         { "next", lua_mongo_cursor_iterate },

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "lua-mongo-cursor.h"
 
 
@@ -46,13 +45,12 @@ lua_mongo_cursor_iterate(lua_State *L)
 {
     lua_mongo_cursor_t *cursor;
     const bson_t *doc;
-    bool throw_error;
 
     cursor = (lua_mongo_cursor_t *)luaL_checkudata(L, 1, "lua_mongo_cursor");
 
     if (mongoc_cursor_next (cursor->c_cursor, &doc)) {
 
-        bson_document_or_array_to_table (L, cursor->c_cursor, doc, false);
+        bson_document_or_array_to_table (L, doc, false);
         bson_destroy (doc);
         return 1;
 
@@ -60,16 +58,11 @@ lua_mongo_cursor_iterate(lua_State *L)
 
         bson_error_t error;
         if (mongoc_cursor_error(cursor->c_cursor, &error)) {
-            throw_error = true;
+            luaL_error(L, error.message);
         }
 
         mongoc_cursor_destroy (cursor->c_cursor);
         cursor->c_cursor = NULL;
-
-        if (throw_error) {
-            luaL_error(L, error.message);
-        }
-
         return 0;
 
     }

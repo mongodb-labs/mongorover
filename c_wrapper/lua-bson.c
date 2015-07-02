@@ -516,7 +516,6 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
 /**
  * bson_document_or_array_to_table:
  * @L: A lua_State.
- * @cursor: a mongoc_cursor_t.
  * @bson_doc: A bson_t.
  * @field: A char *.
  *
@@ -526,7 +525,6 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
 
 void
 bson_document_or_array_to_table (lua_State *L,
-                                 mongoc_cursor_t *cursor,
                                  bson_t *bson_doc,
                                  bool is_table)
 {
