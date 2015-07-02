@@ -16,26 +16,30 @@ limitations under the License.
 
 --]]
 
-local InsertOneResult = {}
-InsertOneResult.__index = InsertOneResult
+local InsertManyResult = {}
+InsertManyResult.__index = InsertManyResult
 	
-	InsertOneResult.__tostringx = function (table_location)
-		InsertOneResult.__tostring = nil    
-		local ret= "<InsertOneResult object at " .. tostring(table_location) .. ">"
-		InsertOneResult.__tostring = InsertOneResult.__tostringx
+	InsertManyResult.__tostringx = function (table_location)
+		InsertManyResult.__tostring = nil    
+		local ret = "<InsertManyResult object at " .. tostring(table_location) .. ">"
+		InsertManyResult.__tostring = InsertManyResult.__tostringx
 		return ret
 	end
 
 	--- Creates a MongoClient instance.
 	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
 	-- @param db_uri The MongoDB connection URI.
-	function InsertOneResult.new(acknowledged, _id)
-		local self = setmetatable({}, InsertOneResult)
-		self.acknowledged = acknowledged
-		self.inserted_id = _id
+	function InsertManyResult.new(raw_result, inserted_ids)
+		local self = setmetatable({}, InsertManyResult)
+		self.raw_result = raw_result
+		self.inserted_ids = inserted_ids
 		return self
 	end
+	
+	function InsertManyResult.isInsertManyResult(object)
+		return getmetatable(object) == InsertManyResult
+	end
 		
-	InsertOneResult.__tostring = InsertOneResult.__tostringx    
+	InsertManyResult.__tostring = InsertManyResult.__tostringx    
 
-return InsertOneResult
+return InsertManyResult

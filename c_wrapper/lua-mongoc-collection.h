@@ -24,18 +24,23 @@
 
 int lua_mongo_collection_new (lua_State *L);
 int lua_mongo_collection_drop (lua_State *L);
+int lua_mongo_collection_count (lua_State *L);
 int lua_mongo_collection_find (lua_State *L);
 int lua_mongo_collection_find_one (lua_State *L);
 int lua_mongo_collection_insert_one (lua_State *L);
-int lua_mongo_collection_update_one (lua_State *L);
+int lua_mongo_collection_insert_many (lua_State *L);
+int lua_mongo_collection_update (lua_State *L);
 int lua_mongo_collection_destroy (lua_State *L);
 
 static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_drop", lua_mongo_collection_drop },
+    { "collection_count", lua_mongo_collection_count },
     { "collection_find", lua_mongo_collection_find },
     { "collection_find_one", lua_mongo_collection_find_one },
     { "collection_insert_one", lua_mongo_collection_insert_one },
-    { "collection_update_one", lua_mongo_collection_update_one },
+    { "collection_insert_many", lua_mongo_collection_insert_many },
+    { "collection_update_one", lua_mongo_collection_update },
+    { "collection_update_many", lua_mongo_collection_update },
     { "__gc", lua_mongo_collection_destroy },
     { NULL, NULL },
 };
