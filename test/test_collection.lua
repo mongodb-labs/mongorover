@@ -30,7 +30,6 @@ LuaUnit = require("luaunit")
 TestClient = {}
 
 	function TestClient:test_database_drop()
-		
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
@@ -44,12 +43,9 @@ TestClient = {}
 		collection:drop()
 		has_database = database:hasCollection("bar")
 		assert(has_database == false, "database did not get dropped")
-		
-	
 	end
 	
 	function TestClient:test_find_one_and_insert_one_with_id()
-		
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
@@ -64,11 +60,9 @@ TestClient = {}
 		allDifferentTypes['_id'] = nil
 
 		assert(table_eq(check_result, allDifferentTypes), "insert_one and find_one documents do not match")
-	
 	end
 
 	function TestClient:test_find_one_and_insert_one_without_id()
-		
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
@@ -81,7 +75,46 @@ TestClient = {}
 		local check_result = collection:find_one({_id=result.inserted_id}, {_id=0})
 		
 		assert(table_eq(check_result, allDifferentTypes), "insert_one and find_one documents do not match")
+	end
 	
+	function TestClient:test_find()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("test")
+		
+		collection:drop()
+		collection = database:getCollection("test")
+		
+		local docs = {}
+		for i=1,5 do
+			local result = collection:insert_one({ a = i<3 })
+			assert(result.acknowledged == true, "insert_one failed")
+		end
+		
+		local results = collection:find({a = true})
+		
+		local numDocuments = 0
+		for result in results do
+			assert(ObjectId.isObjectId(result["_id"], "find did not return object ids"))
+			numDocuments = numDocuments + 1
+		end
+		
+		assert(numDocuments == 2, "inserted two documents and found a different number")
+		
+		-- Test finding 0 documents.
+		numDocuments = 0
+		results = collection:find({should_find_none=0})
+		for result in results do
+			numDocuments = numDocuments + 1
+		end
+		assert(numDocuments == 0)
+		
+		-- Test for error on a bad operation.
+		results = collection:find({a={["$bad_op"]=5}})
+		local status, err = pcall(function() for result in results do print(result) end end)
+		local indexOfError = string.find(err, "BadValue unknown operator: $bad_op")
+		assert(status == false)
+		assert(indexOfError)
 	end
 	
 LuaUnit:run()

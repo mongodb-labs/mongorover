@@ -31,7 +31,7 @@ void _iterate_and_add_values_document_or_array_to_table(lua_State *L,
  * @L: A lua_State.
  * @index: An int.
  *
- * Takes a table at index on stack and iterates through it. If it only has
+ * Takes a table at indice on stack and iterates through it. If it only has
  * ascending number indices starting at 1, then it is an array. If not, it is
  * a table.
  */
@@ -105,18 +105,18 @@ _append_to_bson_doc (lua_State *L,
             bool bool_value = lua_toboolean(L, -1);
             bson_append_bool(bson_doc, key, -1, bool_value);
             break;
-        }
+        };
         case LUA_TNUMBER: {
             lua_Number double_value = lua_tonumber(L, -1);
             bson_append_double(bson_doc, key, -1, double_value);
             break;
-        }
+        };
         case LUA_TSTRING: {
             const char *value;
             value = lua_tostring(L, -1);
             bson_append_utf8(bson_doc, key, -1, value, -1);
             break;
-        }
+        };
         case LUA_TTABLE: {
 
             if (is_ObjectId(L)) {
@@ -162,7 +162,7 @@ _append_to_bson_doc (lua_State *L,
                 }
             }
             break;
-        }
+        };
         default: {
             luaL_error(L, "invalid value type: %s", lua_typename(L, lua_type(L, -2)));
         }
@@ -243,10 +243,15 @@ lua_table_to_bson(lua_State *L,
         lua_pushvalue(L, index);
     }
 
+
+
     if (_id_required && !(append_id_to_bson_doc_if_id_exists(L, -1, bson_doc))) {
-        bson_oid_t oid;
-        bson_oid_init (&oid, NULL);
-        BSON_APPEND_OID (bson_doc, "_id", &oid);
+        bson_iter_t iter;
+        if (!bson_iter_init_find (&iter, bson_doc, "_id")) {
+            bson_oid_t oid;
+            bson_oid_init (&oid, NULL);
+            BSON_APPEND_OID (bson_doc, "_id", &oid);
+        }
     }
 
     lua_pushnil(L);
@@ -258,9 +263,6 @@ lua_table_to_bson(lua_State *L,
                 // Occurs when a string containing a number is used as a key
                 // in document opposed to index in an array.
                 number_string_as_index = true;
-
-                /* FALL THROUGH!! */
-
             case LUA_TSTRING: {
                 const char *key;
 
@@ -276,8 +278,6 @@ lua_table_to_bson(lua_State *L,
                 }
 
                 if (_id_required) {
-                    // _id was already appended to the beginning of the
-                    // document, as per MongoDB specifications.
                     if (strcmp(key, "_id") == 0){
                         lua_pop(L, 1);
                         continue;
@@ -392,7 +392,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L, -2, i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_UTF8: {
                 char *val = value->value.v_utf8.str;
                 if (is_table) {
@@ -403,7 +403,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L, -2, i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_DOCUMENT: {
                 if (is_table) {
                     bson_subdocument_or_subarray_to_table(L, bson_doc, iter);
@@ -412,7 +412,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     bson_subdocument_or_subarray_to_table(L, bson_doc, iter);
                     lua_rawseti(L, -2, i + 1);
                 }
-            }
+            };
             case BSON_TYPE_ARRAY: {
                 if (is_table) {
                     bson_subdocument_or_subarray_to_table(L, bson_doc, iter);
@@ -422,7 +422,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L, -2, i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_BINARY:
                 luaL_error(L, "BSON_TYPE_BINARY not supported yet");
                 break;
@@ -435,7 +435,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 generate_ObjectID(L, str);
                 lua_setfield(L, -2, key);
                 break;
-            }
+            };
             case BSON_TYPE_BOOL: {
                 if (is_table) {
                     lua_pushboolean(L, value->value.v_bool);
@@ -445,7 +445,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L,-2,i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_DATE_TIME:
                 luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
                 break;
@@ -453,9 +453,9 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 generate_BSONNull(L);
                 lua_setfield(L, -2, key);
                 break;
-            }
+            };
             case BSON_TYPE_REGEX:
-                luaL_error(L, "BSON_TYPE_REGEX not supported yet");
+                luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
                 break;
             case BSON_TYPE_DBPOINTER:
                 luaL_error(L, "BSON_TYPE_DBPOINTER not supported yet");
@@ -479,7 +479,7 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L, -2, i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_TIMESTAMP:
                 luaL_error(L, "not supported yet2\n");
                 break;
@@ -493,15 +493,19 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                     lua_rawseti(L, -2, i + 1);
                 }
                 break;
-            }
+            };
             case BSON_TYPE_MAXKEY: {
                 luaL_error(L, "BSON_TYPE_MAXKEY not supported yet\n");
                 break;
-            }
+            };
             case BSON_TYPE_MINKEY: {
                 luaL_error(L, "BSON_TYPE_MINKEY not supported yet\n");
                 break;
-            }
+            };
+            case BSON_TYPE_EOD: {
+                luaL_error(L, "BSON_TYPE_EOD not supported yet\n");
+                break;
+            };
             default:
                 break;
         }
@@ -530,8 +534,6 @@ bson_document_or_array_to_table (lua_State *L,
     lua_newtable (L);
     if (bson_iter_init (&iter, bson_doc)) {
         _iterate_and_add_values_document_or_array_to_table(L, bson_doc, &iter, is_table);
-    } else {
-        luaL_error(L, "bson_iter_init failed to point to bson document");
     }
 }
 
@@ -561,19 +563,19 @@ lua_place_bson_field_value_on_top_of_stack(lua_State *L,
                 lua_Number val = value->value.v_double;
                 lua_pushnumber(L, val);
                 break;
-            }
+            };
             case BSON_TYPE_UTF8: {
                 lua_pushstring(L, value->value.v_utf8.str);
                 break;
-            }
+            };
             case BSON_TYPE_DOCUMENT: {
                 luaL_error(L, "_id cannot be a document");
                 break;
-            }
+            };
             case BSON_TYPE_ARRAY: {
                 luaL_error(L, "_id cannot be a table");
                 break;
-            }
+            };
             case BSON_TYPE_BINARY:
                 luaL_error(L, "BSON_TYPE_BINARY not supported yet");
                 break;
@@ -585,18 +587,18 @@ lua_place_bson_field_value_on_top_of_stack(lua_State *L,
                 bson_oid_to_string (value->value.v_oid.bytes, oid_str);
                 generate_ObjectID(L, oid_str);
                 break;
-            }
+            };
             case BSON_TYPE_BOOL: {
                 lua_pushboolean(L, value->value.v_bool);
                 break;
-            }
+            };
             case BSON_TYPE_DATE_TIME:
                 luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
                 break;
             case BSON_TYPE_NULL: {
                 generate_BSONNull(L);
                 break;
-            }
+            };
             case BSON_TYPE_REGEX:
                 luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
                 break;
@@ -615,26 +617,26 @@ lua_place_bson_field_value_on_top_of_stack(lua_State *L,
             case BSON_TYPE_INT32: {
                 lua_pushnumber(L, value->value.v_int32);
                 break;
-            }
+            };
             case BSON_TYPE_TIMESTAMP:
                 luaL_error(L, "not supported yet2\n");
                 break;
             case BSON_TYPE_INT64: {
                 lua_pushnumber(L, value->value.v_int64);
                 break;
-            }
+            };
             case BSON_TYPE_MAXKEY: {
                 luaL_error(L, "BSON_TYPE_MAXKEY not supported yet\n");
                 break;
-            }
+            };
             case BSON_TYPE_MINKEY: {
                 luaL_error(L, "BSON_TYPE_MINKEY not supported yet\n");
                 break;
-            }
+            };
             case BSON_TYPE_EOD: {
                 luaL_error(L, "BSON_TYPE_EOD not supported yet\n");
                 break;
-            }
+            };
             default:
                 break;
         }

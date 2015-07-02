@@ -13,26 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LUA_MONGO_MODULE_H
-#define LUA_MONGO_MODULE_H
 
-#include "lua-bson.h"
-#include "lua-mongoc-client.h"
-#include "lua-mongoc-collection.h"
-#include "lua-mongo-cursor.h"
-#include "lua-mongoc-database.h"
+#ifndef MONGO_MODULE_LUA_MONGO_CURSOR_H
+#define MONGO_MODULE_LUA_MONGO_CURSOR_H
+
 #include "lua-mongoc-wrapper.h"
-#include "lua-version-compat.h"
+#include "lua-bson.h"
 
-static const struct luaL_Reg mongo_module_methods[] = {
-    { NULL, NULL },
+void lua_mongo_cursor_new(lua_State *L, mongoc_cursor_t *cursor);
+int lua_mongo_cursor_iterate(lua_State *L);
+int lua_mongo_cursor_destroy(lua_State *L);
+
+static const struct luaL_Reg lua_mongo_cursor_methods[] = {
+        { "next", lua_mongo_cursor_iterate },
+        { "__gc", lua_mongo_cursor_destroy },
+        { NULL, NULL },
 };
 
-static const struct luaL_Reg mongo_module_functions[] = {
-    { "client_new", lua_mongo_client_new },
-    { "collection_new", lua_mongo_collection_new },
-    { "database_new", lua_mongo_database_new },
-    { NULL,  NULL }
+static const struct luaL_Reg lua_mongo_cursor_functions[] = {
+        { NULL, NULL }
 };
 
-#endif LUA_MONGO_MODULE_H
+typedef struct {
+    mongoc_cursor_t *c_cursor;
+} lua_mongo_cursor_t;
+
+#endif //MONGO_MODULE_LUA_MONGO_CURSOR_H
+
+
