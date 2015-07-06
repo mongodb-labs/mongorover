@@ -108,7 +108,7 @@ TestClient = {}
 		
 		docs = {}
 		for i=1,5 do
-			docs[i] = {_id=i}
+			docs[i] = {_id = i}
 		end
 		result = collection:insert_many(docs)
 		assert(InsertManyResult.isInsertManyResult(result))
@@ -133,7 +133,7 @@ TestClient = {}
 		
 		local docs = {}
 		for i=1,5 do
-			local result = collection:insert_one({ a = i<3 })
+			local result = collection:insert_one({ a = i < 3 })
 			assert(result.acknowledged == true, "insert_one failed")
 		end
 		
@@ -153,20 +153,21 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
+		collection:insert_one({})
 		collection:drop()
 		collection = database:getCollection("test")
 		
-		id1 = collection:insert_one({x = 5}).inserted_id
+		local id1 = collection:insert_one({x = 5}).inserted_id
 		
-		result = collection:update_one({}, {["$inc"] = {x=1}})
+		local result = collection:update_one({}, {["$inc"] = {x = 1}})
 		
 		assert(UpdateResult.isUpdateResult(result))
 		assert(result.modified_count == 1)
 		assert(type(result.upserted_id) == "nil")
 		assert(collection:find_one({_id = id1}).x == 6)
 		
-		id2 = collection:insert_one({x=1}).inserted_id
-		result = collection:update_one({x = 6},  {["$inc"] = {x =1}})
+		local id2 = collection:insert_one({x = 1}).inserted_id
+		result = collection:update_one({x = 6},  {["$inc"] = {x = 1}})
 		assert(UpdateResult.isUpdateResult(result))
 		assert(result.matched_count == 1)
 		assert(result.modified_count == 1)
@@ -174,7 +175,40 @@ TestClient = {}
 		assert(collection:find_one({_id = id1}).x == 7)
 		assert(collection:find_one({_id = id2}).x == 1)
 		
-		result = collection:update_one({x=2}, {["$set"] = {y=1}}, true)
+		result = collection:update_one({x=2}, {["$set"] = {y = 1}}, true)
+		assert(UpdateResult.isUpdateResult(result))
+		assert(result.matched_count == 0)
+		assert(result.modified_count == 0)
+		assert(ObjectId.isObjectId(result.upserted_id))
+	end
+	
+	function TestClient:test_update_many()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("test")
+		
+		collection:insert_one({})
+		collection:drop()
+		collection = database:getCollection("test")
+		
+		collection:insert_one({x = 4, y = 3})
+		collection:insert_one({x = 5, y = 5})
+		collection:insert_one({x = 4, y = 4})
+		
+		local result = collection:update_many({x = 4}, {["$set"] = {y = 5}})
+		assert(UpdateResult.isUpdateResult(result))
+		assert(result.matched_count == 2)
+		assert(result.modified_count == 2)
+		assert(type(result.upserted_id) == "nil")
+		
+		result = collection:update_many({x = 5}, {["$set"] = {y = 6}})
+		assert(UpdateResult.isUpdateResult(result))
+		assert(result.matched_count == 1)
+		assert(result.modified_count == 1)
+		assert(type(result.upserted_id) == "nil")
+		assert(collection:count({y = 6}) == 1)
+		
+		result = collection:update_many({x = 2}, {["$set"] = {y = 1}}, true)
 		assert(UpdateResult.isUpdateResult(result))
 		assert(result.matched_count == 0)
 		assert(result.modified_count == 0)
