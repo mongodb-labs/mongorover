@@ -36,7 +36,7 @@ generate_ObjectID(lua_State *L,
     lua_getglobal(L, "ObjectId");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
-                 "ObjectId could not be imported",
+                 "ObjectId not a global variable",
                  sizeof (error->message));
         return false;
     }
@@ -159,7 +159,7 @@ generate_InsertOneResult(lua_State *L,
     lua_getglobal(L, "InsertOneResult");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
-                 "InsertOneResult could not be imported",
+                 "InsertOneResult not a global variable",
                  sizeof (error->message));
         return false;
     }
@@ -219,7 +219,7 @@ generate_InsertManyResult(lua_State *L,
 
     lua_getglobal(L, "InsertManyResult");
     if (!lua_istable(L, -1)) {
-        strncpy (error->message, "InsertManyResult could not be imported",
+        strncpy (error->message, "InsertManyResult not a global variable",
                  sizeof (error->message));
         return false;
     }
@@ -276,7 +276,7 @@ generate_DeleteResult(lua_State *L,
     lua_getglobal(L, "DeleteResult");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
-                 "DeleteResult could not be imported",
+                 "DeleteResult not a global variable",
                  sizeof (error->message));
         return false;
     }

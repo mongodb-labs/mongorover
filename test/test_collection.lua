@@ -201,7 +201,7 @@ TestClient = {}
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
-
+		
 		collection:drop()
 		collection = database:getCollection("test")
 		
@@ -228,51 +228,6 @@ TestClient = {}
 		assert(result.modified_count == 0)
 		assert(ObjectId.isObjectId(result.upserted_id))
 	end
-	
-	function TestClient:test_delete_one()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
-		local database = client:getDatabase("foo")
-		local collection = database:getCollection("test")
-		
-		collection:drop()
-		collection = database:getCollection("test")
-		
-		collection:insert_one({x = 1})
-		collection:insert_one({y = 1})
-		collection:insert_one({z = 1})
-		
-		local result = collection:delete_one({x = 1})
-		assert(DeleteResult.isDeleteResult(result))
-		assert(result.deleted_count == 1)
-		assert(result.acknowledged)
-		assert(collection:count() == 2)
-		
-		result = collection:delete_one({y = 1})
-		assert(DeleteResult.isDeleteResult(result))
-		assert(result.deleted_count == 1)
-		assert(result.acknowledged)
-		assert(collection:count() == 1)
-	end
-	
-	function TestClient:test_delete_many()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
-		local database = client:getDatabase("foo")
-		local collection = database:getCollection("test")
-		
-		collection:drop()
-		collection = database:getCollection("test")
-		
-		collection:insert_one({x = 1})
-		collection:insert_one({x = 1})
-		collection:insert_one({y = 1})
-		collection:insert_one({y = 1})
-		
-		local result = collection:delete_many({x = 1})
-		assert(DeleteResult.isDeleteResult(result))
-		assert(result.deleted_count == 2)
-		assert(result.acknowledged)
-		assert(collection:count() == 2)
-	end
 
 	function TestClient:test_count()
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
@@ -292,6 +247,30 @@ TestClient = {}
 		assert(num_results == 1)
 		assert(collection:count({foo = "bar"}) == 1)
 		assert(collection:count({foo = {["$regex"] = "ba.*"}}) == 2)
+	end
+	
+	function TestClient:test_aggregate()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("test")
+		
+		collection:drop()
+		local inserted_document = { foo = {1, 2} }
+		collection:insert_one(inserted_document)
+		inserted_document["_id"] = nil
+		 local aggregationPipeline = { {["$project"] = {_id = false, foo = true}} }
+
+		local results = collection:aggregate(aggregationPipeline)
+				
+		local result_array = {}
+		local index = 1
+		for result in results do
+			result_array[index] = result
+			index = index + 1
+		end
+				
+		assert(#result_array == 1)
+		assert(table_eq(inserted_document, result_array[1]))
 	end
 	
 LuaUnit:run()

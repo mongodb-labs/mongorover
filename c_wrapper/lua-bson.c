@@ -57,48 +57,16 @@ _convert_to_absolute_stack_index(lua_State *L,
  * @L: A lua_State.
  * @index: An int.
  *
- * Takes a table at indice on stack and iterates through it. If it only has
- * ascending number indices starting at 1, then it is an array. If not, it is
+ * Takes a table at index on stack and iterates through it. If it only has
+ * ascending number indexes starting at 1, then it is an array. If not, it is
  * a table.
  */
 
 bool
 lua_table_is_array(lua_State *L, int index)
 {
-    int num_keys;
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
-
-    // Iterate through keys and check if they are all numbers.
-    lua_pushnil(L);
-
-    for (num_keys = 0; lua_next(L, -2) != 0; num_keys++) {
-        if ((lua_type(L, -2)) != LUA_TNUMBER) {
-            lua_pop(L, 2);
-            return false;
-        }
-        lua_pop(L, 1);
-    }
-
-    // Empty table defaults to an empty table instead of empty array.
-    if (num_keys == 0) {
-        return false;
-    }
-
-    // Iterate through like ipairs, and make sure the indices are in ascending
-    // order and there are no gaps.
-    for (int i=1 ; i < num_keys; i++) {
-        lua_rawgeti(L, absolute_stack_index, i);
-
-        // If the index does not exist, it will cause lua_isnil to return nil.
-        if ( lua_isnil(L,-1) ) {
-            lua_pop(L,1);
-            return false;
-        }
-
-        lua_pop(L,1);
-    }
-
-    return true;
+    return lua_array_length(L, absolute_stack_index) > 0;
 }
 
 int
@@ -199,7 +167,7 @@ _append_to_bson_doc (lua_State *L,
             } else {
 
                 bson_t subdocument;
-                if (lua_array_length(L, -1) > 0) {
+                if (lua_table_is_array(L, -1)) {
                     bson_append_array_begin(bson_doc, key, -1, &subdocument);
                     if (!(lua_table_to_bson(L, &subdocument, -1, false, error))) {
                         return false;
@@ -306,7 +274,14 @@ lua_table_to_bson(lua_State *L,
                   bool _id_required,
                   bson_error_t *error)
 {
+    // index: relative or absolute position of table on the stack being
+    // converted
+    // absolute_stack_index: index converted to an absolute stack index
+    // array_index: Potentially altered lua index (since lua indexes start at 1)
+
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
+    bool is_array;
+    int array_index;
 
     if(!lua_istable(L, absolute_stack_index)) {
         bson_snprintf(error->message, sizeof(error->message),
@@ -329,6 +304,8 @@ lua_table_to_bson(lua_State *L,
         }
     }
 
+    is_array = lua_table_is_array(L, absolute_stack_index);
+
     lua_pushnil(L);
     while (lua_next(L, absolute_stack_index) != 0) {
         bool number_string_as_index = false;
@@ -350,7 +327,15 @@ lua_table_to_bson(lua_State *L,
                     // Function tostring converts the value on the stack.
                     // Need to make copy, convert it, then pop to allow lua_next
                     // to iterate correctly.
-                    lua_pushvalue(L, -2);
+                    array_index = lua_tonumber(L, -2);
+
+                    // Lua indices start at 1, so decrement by one if it is
+                    // an array.
+                    if (is_array) {
+                        array_index--;
+                    }
+
+                    lua_pushnumber(L, array_index);
                     key = lua_tostring(L, -1);
                     lua_pop(L, 1);
                 }
