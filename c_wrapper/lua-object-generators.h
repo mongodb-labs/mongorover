@@ -17,11 +17,24 @@
 #ifndef MONGO_MODULE_LUA_OBJECT_GENERATORS_H
 #define MONGO_MODULE_LUA_OBJECT_GENERATORS_H
 
+#include "lua-bson.h"
 #include "lua-mongoc-wrapper.h"
 
 void generate_ObjectID(lua_State *L, char *str);
+
 bool is_ObjectId(lua_State *L);
+
 void generate_BSONNull(lua_State *L);
+
 bool is_BSONNull(lua_State *L);
+
+void generate_InsertOneResult(lua_State *L,
+                              bool acknowledged,
+                              int index);
+
+void generate_InsertManyResult(lua_State *L,
+                               bson_t *raw_result,
+                               int index,
+                               int num_elements);
 
 #endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H

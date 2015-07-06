@@ -21,9 +21,11 @@
 #include "lua-mongoc-wrapper.h"
 #include "lua-object-generators.h"
 
-bool append_id_to_bson_doc_if_id_exists(lua_State *L,
-                                        int index,
-                                        bson_t *bson_doc);
+void find_and_set_or_create_id(lua_State *L,
+                               int index,
+                               bson_t *bson_doc);
+
+int lua_array_length(lua_State *L, int index);
 
 void lua_table_to_bson(lua_State *L,
                        bson_t *bson_doc,

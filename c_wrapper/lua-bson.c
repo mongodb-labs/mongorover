@@ -16,6 +16,9 @@
 
 #include "lua-bson.h"
 
+int _convert_to_absolute_stack_index(lua_State *L,
+                                     int index);
+
 void _append_to_bson_doc(lua_State *L,
                         bson_t *bson_doc,
                         const char *key);
@@ -24,6 +27,26 @@ void _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                                                        bson_t *bson_doc,
                                                        bson_iter_t *iter,
                                                        bool is_table);
+
+/**
+ * _convert_to_absolute_stack_index
+ * @L: A lua_State.
+ * @index: An int.
+ *
+ * Converts any stack index to an absolute index. A negative stack index is
+ * relative to the top of the stack, so any objects placed on top of the
+ * stack changes the relative index.
+ *
+ * Good explanation here: http://www.lua.org/pil/24.2.3.html. Particularly
+ * this: "negative index -x is equivalent to the positive index gettop - x + 1".
+ */
+
+int
+_convert_to_absolute_stack_index(lua_State *L,
+                                 int index)
+{
+    return index > 0 ? index : lua_gettop(L) + index + 1;
+}
 
 
 /**
@@ -39,15 +62,12 @@ void _iterate_and_add_values_document_or_array_to_table(lua_State *L,
 bool
 lua_table_is_array(lua_State *L, int index)
 {
-
     int num_keys;
-
-    if (index != -1 && lua_gettop(L) != index) {
-        lua_pushvalue(L, index);
-    }
+    int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
 
     // Iterate through keys and check if they are all numbers.
     lua_pushnil(L);
+
     for (num_keys = 0; lua_next(L, -2) != 0; num_keys++) {
         if ((lua_type(L, -2)) != LUA_TNUMBER) {
             lua_pop(L, 2);
@@ -64,7 +84,7 @@ lua_table_is_array(lua_State *L, int index)
     // Iterate through like ipairs, and make sure the indices are in ascending
     // order and there are no gaps.
     for (int i=1 ; i < num_keys; i++) {
-        lua_rawgeti(L,-1,i);
+        lua_rawgeti(L, absolute_stack_index, i);
 
         // If the index does not exist, it will cause lua_isnil to return nil.
         if ( lua_isnil(L,-1) ) {
@@ -75,13 +95,32 @@ lua_table_is_array(lua_State *L, int index)
         lua_pop(L,1);
     }
 
-    if (index != -1 && lua_gettop(L) != index) {
-        lua_pop(L, 1);
-    }
-
     return true;
 }
 
+int
+lua_array_length(lua_State *L, int index)
+{
+
+    int num_keys;
+    int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
+
+    lua_pushnil(L);
+
+    for (num_keys = 0; lua_next(L, absolute_stack_index) != 0; num_keys++) {
+        if ((lua_type(L, -2)) != LUA_TNUMBER) {
+            lua_pop(L, 2);
+            return false;
+        }
+        int index = lua_tonumber(L, -2);
+        lua_pop(L, 1);
+        if (index != num_keys + 1) {
+            return -1;
+        }
+    }
+
+    return num_keys;
+}
 
 /**
  * _append_to_bson_doc
@@ -151,7 +190,7 @@ _append_to_bson_doc (lua_State *L,
             } else {
 
                 bson_t subdocument;
-                if (lua_table_is_array(L, -1)) {
+                if (lua_array_length(L, -1) > 0) {
                     bson_append_array_begin(bson_doc, key, -1, &subdocument);
                     lua_table_to_bson(L, &subdocument, -1, false);
                     bson_append_array_end(bson_doc, &subdocument);
@@ -171,42 +210,48 @@ _append_to_bson_doc (lua_State *L,
 
 
 /**
- * lua_table_contains_id_field:
+ * find_and_set_or_create_id:
  * @L: A lua_State.
  * @index: An int.
  * @bson_doc: A bson_t.
  *
- * Takes a table at given index and returns whether table["_id"] exists or not.
- * If it exists, it will be appended to the bson document.
+ * Takes a table at given index and checks whether it has an _id field in it.
+ * It will append the _id to the bson document given and also to the table on
+ * the stack. If no _id exists, it will create one.
  */
 
-bool
-append_id_to_bson_doc_if_id_exists(lua_State *L,
-                                   int index,
-                                   bson_t *bson_doc)
+void
+find_and_set_or_create_id(lua_State *L,
+                      int index,
+                      bson_t *bson_doc)
 {
-    bool contains_id;
+    bson_oid_t oid;
+    char str[25];
+    int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
 
-    int stack_size = lua_gettop(L);
-    if (index != -1 && stack_size != index) {
-        lua_pushvalue(L, index);
+    if (!(bson_empty(bson_doc))) {
+        luaL_error(L, "bson document not empty. _id needs to be appended "
+                "first");
     }
+
     lua_pushstring(L, "_id");
-    lua_gettable(L, -2);
+    lua_gettable(L, absolute_stack_index);
 
-    contains_id = !lua_isnil(L, -1);
-
-    if (contains_id) {
+    if (!lua_isnil(L, -1)) {
         _append_to_bson_doc(L, bson_doc, "_id");
-    }
-
-    lua_pop(L, 1);
-
-    if (index != -1 && stack_size != index) {
         lua_pop(L, 1);
+    } else {
+        // Lingering nil value on the stack from the lua_gettable( ... ) call.
+        lua_pop(L, 1);
+
+        bson_oid_init (&oid, NULL);
+        BSON_APPEND_OID (bson_doc, "_id", &oid);
+        bson_oid_to_string(&oid, str);
+        generate_ObjectID(L, str);
+        lua_setfield(L, absolute_stack_index, "_id");
     }
 
-    return contains_id;
+    return;
 }
 
 
@@ -221,7 +266,9 @@ append_id_to_bson_doc_if_id_exists(lua_State *L,
  * converting its contents into the bson_doc.
  *
  * If _id_required is true, an _id with ObjectId will be created at the
- * beginning of the object if it is not present already in the document.
+ * beginning of the object if it is not present already in the document. It
+ * will be skipped when it is iterated over again while going through all the
+ * keys in the lua table.
  */
 
 void
@@ -230,6 +277,8 @@ lua_table_to_bson(lua_State *L,
                   int index,
                   bool _id_required)
 {
+    int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
+
     if(!lua_istable(L, index)) {
         luaL_error(L, "value at index %d is not a table", index);
     }
@@ -239,23 +288,13 @@ lua_table_to_bson(lua_State *L,
                 "would cause stack overflow in C API");
     }
 
-    if (index != -1 && lua_gettop(L) != index) {
-        lua_pushvalue(L, index);
-    }
-
-
-
-    if (_id_required && !(append_id_to_bson_doc_if_id_exists(L, -1, bson_doc))) {
-        bson_iter_t iter;
-        if (!bson_iter_init_find (&iter, bson_doc, "_id")) {
-            bson_oid_t oid;
-            bson_oid_init (&oid, NULL);
-            BSON_APPEND_OID (bson_doc, "_id", &oid);
-        }
+    if (_id_required) {
+        find_and_set_or_create_id(L, -1, bson_doc);
     }
 
     lua_pushnil(L);
-    while (lua_next(L, -2) != 0) {
+
+    while (lua_next(L, absolute_stack_index) != 0) {
         bool number_string_as_index = false;
         switch (lua_type(L, -2)) {
 
@@ -292,10 +331,6 @@ lua_table_to_bson(lua_State *L,
                 break;
             }
         }
-        lua_pop(L, 1);
-    }
-
-    if (index != -1 && lua_gettop(L) != index) {
         lua_pop(L, 1);
     }
 }

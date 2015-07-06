@@ -19,7 +19,8 @@ limitations under the License.
 ObjectId = require("ObjectId")
 BSONNull = require("BSONNull")
 InsertOneResult = require("resultObjects.InsertOneResult")
-UpdateOneResult = require("resultObjects.UpdateOneResult")
+InsertManyResult = require("resultObjects.InsertManyResult")
+UpdateResult = require("resultObjects.UpdateResult")
 
 local MongoCollection = {__mode="k"}
 MongoCollection.__index = MongoCollection
@@ -38,6 +39,12 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:drop()
 		ret = self.collection_t:collection_drop()
 		return ret
+	end
+	
+	function MongoCollection:count(query, skip, limit)
+		skip = skip or 0
+		limit = limit or 0
+		return self.collection_t:collection_count(query, skip, limit)
 	end
 	
 	function createCursorIterator (collection, mongoCursor)
@@ -67,12 +74,23 @@ MongoCollection.__index = MongoCollection
 	
 	function MongoCollection:update_one(filter, update, upsert)
 		upsert = upsert or false
-		local raw_result = self.collection_t:collection_update_one(filter, update, upsert)
-		return UpdateOneResult.new(raw_result)
+		local raw_result = self.collection_t:collection_update_one(filter, update, upsert, false)
+		return UpdateResult.new(raw_result)
+	end
+	
+	function MongoCollection:update_many(filter, update, upsert)
+		upsert = upsert or false
+		local raw_result = self.collection_t:collection_update_many(filter, update, upsert, true)
+		return UpdateResult.new(raw_result)
 	end
 	
 	function MongoCollection:insert_one(doc)
 		return self.collection_t:collection_insert_one(doc)
+	end
+	
+	function MongoCollection:insert_many(docs, ordered)
+		ordered = ordered or true
+		return self.collection_t:collection_insert_many(docs, ordered)
 	end
 	
 	function MongoCollection:makeRandomObjectId()
