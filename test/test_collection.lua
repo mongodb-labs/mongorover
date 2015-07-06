@@ -42,7 +42,6 @@ TestClient = {}
 		has_database = database:hasCollection("bar")
 		assert(has_database == true, "database does not exist after insert_one(...)")
 		
-		collection:insert_one({})
 		collection:drop()
 		
 		has_database = database:hasCollection("bar")
@@ -54,7 +53,6 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
 		
-		collection:insert_one({})
 		collection:drop()
 		
 		local allDifferentTypes = {a=1, b=2, c="C", d="D", e=true, z=BSONNull.new(), _id=ObjectId.new("55830e73d2b38bf021417851")}
@@ -85,7 +83,6 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
-		collection:insert_one({})
 		collection:drop()
 		
 		collection = database:getCollection("test")
@@ -127,7 +124,6 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
-		collection:insert_one({})
 		collection:drop()
 		collection = database:getCollection("test")
 		
@@ -153,7 +149,6 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
-		collection:insert_one({})
 		collection:drop()
 		collection = database:getCollection("test")
 		
@@ -186,8 +181,7 @@ TestClient = {}
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
-		
-		collection:insert_one({})
+
 		collection:drop()
 		collection = database:getCollection("test")
 		
@@ -220,7 +214,6 @@ TestClient = {}
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
-		collection:insert_one({})
 		collection:drop()
 		collection = database:getCollection("test")
 		

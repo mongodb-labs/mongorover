@@ -55,7 +55,10 @@ lua_mongo_collection_drop (lua_State *L)
     if (ret) {
         lua_pushboolean(L, ret);
     } else {
-        luaL_error(L, error.message);
+        // Ignore error if dropping collection that does not exist.
+        if (strcmp(error.message, "ns not found") != 0) {
+            luaL_error(L, error.message);
+        }
     }
 
     return 1;
