@@ -36,6 +36,7 @@ lua_mongo_cursor_new(lua_State *L, mongoc_cursor_t *find_result_cursor)
 
     luaL_getmetatable(L, "lua_mongo_cursor");
     lua_setmetatable(L, -2);
+
     return;
 }
 
@@ -45,28 +46,39 @@ lua_mongo_cursor_iterate(lua_State *L)
 {
     lua_mongo_cursor_t *cursor;
     const bson_t *doc;
+    bson_error_t error;
+    bool throw_error = false;
 
     cursor = (lua_mongo_cursor_t *)luaL_checkudata(L, 1, "lua_mongo_cursor");
 
-    if (mongoc_cursor_next (cursor->c_cursor, &doc)) {
+    if (mongoc_cursor_next(cursor->c_cursor, &doc)) {
+        if (!(bson_document_or_array_to_table (L, doc, false, &error))) {
+            throw_error = true;
+        }
 
-        bson_document_or_array_to_table (L, doc, false);
-        bson_destroy (doc);
-        return 1;
+        bson_destroy(doc);
 
-    } else {
-
-        bson_error_t error;
-        if (mongoc_cursor_error(cursor->c_cursor, &error)) {
+        if (throw_error) {
             luaL_error(L, error.message);
         }
 
-        mongoc_cursor_destroy (cursor->c_cursor);
-        cursor->c_cursor = NULL;
-        return 0;
+        return 1;
+    } else {
+        if (mongoc_cursor_error(cursor->c_cursor, &error)) {
+            throw_error = true;
+        }
 
+        mongoc_cursor_destroy(cursor->c_cursor);
+        cursor->c_cursor = NULL;
+
+        if (throw_error) {
+            luaL_error(L, error.message);
+        }
+
+        return 0;
     }
 }
+
 
 int
 lua_mongo_cursor_destroy(lua_State *L)

@@ -16,7 +16,7 @@ limitations under the License.
 
 --]]
 
-package.cpath = package.cpath .. ";./c_wrapper/build/?.dylib;../c_wrapper/build/?.dylib"
+package.cpath = package.cpath .. ";./c_wrapper/build/?.dylib;../c_wrapper/build/?.dylib;./c_wrapper/build/?.so;../c_wrapper/build/?.so"
 MongoModule = require("mongo_module")
 local MongoDatabase = require("MongoDatabase")
 

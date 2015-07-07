@@ -20,21 +20,27 @@
 #include "lua-bson.h"
 #include "lua-mongoc-wrapper.h"
 
-void generate_ObjectID(lua_State *L, char *str);
+bool generate_ObjectID(lua_State *L,
+                       char *str,
+                       bson_error_t *error);
 
-bool is_ObjectId(lua_State *L);
+bool is_ObjectId(lua_State *L,
+                 int index);
 
 void generate_BSONNull(lua_State *L);
 
-bool is_BSONNull(lua_State *L);
+bool is_BSONNull(lua_State *L,
+                 int index);
 
-void generate_InsertOneResult(lua_State *L,
+bool generate_InsertOneResult(lua_State *L,
                               bool acknowledged,
-                              int index);
+                              int index,
+                              bson_error_t *error);
 
-void generate_InsertManyResult(lua_State *L,
+bool generate_InsertManyResult(lua_State *L,
                                bson_t *raw_result,
                                int index,
-                               int num_elements);
+                               int num_elements,
+                               bson_error_t *error);
 
 #endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H
