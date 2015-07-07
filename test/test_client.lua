@@ -15,8 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 --]]
-
-package.path = package.path .. ';./luaMongo/?.lua;./test/?.lua;../luaMongo/?.lua'
+package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
 MongoClient = require("MongoClient")
 LuaUnit = require("luaunit")
 

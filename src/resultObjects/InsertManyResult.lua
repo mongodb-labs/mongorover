@@ -16,6 +16,12 @@ limitations under the License.
 
 --]]
 
+---
+-- @submodule mongorover.resultObjects
+
+--- The return type for insert_many().
+--@type InsertManyResult
+
 local InsertManyResult = {}
 InsertManyResult.__index = InsertManyResult
 	
@@ -26,9 +32,10 @@ InsertManyResult.__index = InsertManyResult
 		return ret
 	end
 
-	--- Creates a MongoClient instance.
-	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
-	-- @param db_uri The MongoDB connection URI.
+	---
+	-- Creates a InsertManyResult instance.
+	-- @tparam table raw_result Response from MongoDB converted into a Lua table.
+	-- @tparam {table,...} inserted_ids Array of _ids that were inserted.
 	function InsertManyResult.new(raw_result, inserted_ids)
 		local self = setmetatable({}, InsertManyResult)
 		self.raw_result = raw_result
@@ -36,6 +43,10 @@ InsertManyResult.__index = InsertManyResult
 		return self
 	end
 	
+	---
+	-- Checks whether the object is an InsertManyResult or not.
+	-- @param object The object to be checked whether it is an InsertManyResult.
+	-- @treturn bool Whether the object is an InsertManyResult or not.
 	function InsertManyResult.isInsertManyResult(object)
 		return getmetatable(object) == InsertManyResult
 	end

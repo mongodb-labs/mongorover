@@ -16,14 +16,29 @@ limitations under the License.
 
 --]]
 
-local MongoCollection = require("MongoCollection")
+local MongoCollection = nil
+if _G["RELEASE"] then
+	MongoCollection = require("mongorover.MongoCollection")
+else
+	MongoCollection = require("MongoCollection")
+end
+
+--- Database level operations.
+-- @module mongorover.MongoDatabase
+
+----
+--- Database level operations.
+-- @type mongorover.MongoDatabase
 
 local MongoDatabase = {__mode="k"}
 MongoDatabase.__index = MongoDatabase
 
-	--- Creates a new MongoDatabase object.
-	-- @param client A MongoClient instance.
-	-- @param database_name
+	---
+	-- Creates a new MongoDatabase instance. Called by MongoClient's getDatabase(...) method.
+	-- @see MongoClient.getDatabase
+	-- @tparam MongoClient client A MongoClient instance.
+	-- @tparam string database_name
+	-- @return A @{MongoDatabase} instance.
 	function MongoDatabase.new(client, database_name)
 		local self = setmetatable({}, MongoDatabase)
 		self.database_t = MongoModule.database_new(client.client_t, database_name)
@@ -31,28 +46,34 @@ MongoDatabase.__index = MongoDatabase
 		return self
 	end
 	
-	--- Creates MongoCollection instance.
-	-- @param collection_name
+	---
+	-- Creates MongoCollection instance.
+	-- @tparam string collection_name Name of collection.
+	-- @return A @{MongoCollection} instance.
 	function MongoDatabase:getCollection(collection_name)
 		return MongoCollection.new(self, collection_name)
 	end
 
-	--- Returns array of collection names.
+	---
+	-- Returns array of collection names.
+	-- @treturn {string,...} An array containing the names of collections in the database.
 	function MongoDatabase:getCollectionNames()
 		collection_names = self.database_t:get_collection_names()
 		return collection_names
 	end
 
-	--- Drops the database.
+	---
+	-- Drops the database.
 	function MongoDatabase:drop_database()
 		self.database_t:database_drop()
 		self.database_t = nil
 	end
 	
 	--- Returns boolean whether the collection is present in the database.
-	-- @param database_name
-	function MongoDatabase:hasCollection(database_name)
-		ret = self.database_t:has_collection(database_name)
+	-- @tparam string collectionName The name of the database.
+	-- @treturn boolean A boolean value whether the database has the collection.
+	function MongoDatabase:hasCollection(collectionName)
+		ret = self.database_t:has_collection(collectionName)
 		return ret
 	end
 

@@ -16,6 +16,12 @@ limitations under the License.
 
 --]]
 
+---
+-- @submodule mongorover.resultObjects
+
+--- The return type for insert_one().
+--@type InsertOneResult
+
 local InsertOneResult = {}
 InsertOneResult.__index = InsertOneResult
 	
@@ -26,14 +32,23 @@ InsertOneResult.__index = InsertOneResult
 		return ret
 	end
 
-	--- Creates a MongoClient instance.
-	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
-	-- @param db_uri The MongoDB connection URI.
+	---
+	-- Creates a InsertOneResult instance.
+	-- @tparam bool acknowledged Whether the insert was acknowledged or not.
+	-- @param _id The _id of the inserted document.
 	function InsertOneResult.new(acknowledged, _id)
 		local self = setmetatable({}, InsertOneResult)
 		self.acknowledged = acknowledged
 		self.inserted_id = _id
 		return self
+	end
+	
+	---
+	-- Checks whether the object is an InsertOneResult or not.
+	-- @param object The object to be checked whether it is an InsertOneResult.
+	-- @treturn bool Whether the object is an InsertOneResult or not.
+	function InsertOneResult.isInsertOneResult(object)
+		return getmetatable(object) == InsertOneResult
 	end
 		
 	InsertOneResult.__tostring = InsertOneResult.__tostringx    

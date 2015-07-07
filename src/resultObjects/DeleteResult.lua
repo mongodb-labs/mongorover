@@ -16,6 +16,12 @@ limitations under the License.
 
 --]]
 
+---
+-- @submodule mongorover.resultObjects
+
+--- The return type for delete_one() and delete_many().
+--@type DeleteResult
+
 local DeleteResult = {}
 DeleteResult.__index = DeleteResult
 	
@@ -26,9 +32,11 @@ DeleteResult.__index = DeleteResult
 		return ret
 	end
 
-	--- Creates a MongoClient instance.
-	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
-	-- @param db_uri The MongoDB connection URI.
+	---
+	-- Creates a MongoClient instance.
+	-- Uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
+	-- @tparam bool acknowledged Response from server.
+	-- @tparam string raw_result The response from the server converted into a Lua table.
 	function DeleteResult.new(acknowledged, raw_result)
 		local self = setmetatable({}, DeleteResult)
 		self.acknowledged = acknowledged
@@ -37,6 +45,10 @@ DeleteResult.__index = DeleteResult
 		return self
 	end
 	
+	---
+	-- Checks whether the object is an DeleteResult or not.
+	-- @param object The object to be checked whether it is an DeleteResult.
+	-- @treturn bool Whether the object is an DeleteResult or not.
 	function DeleteResult.isDeleteResult(object)
 		return getmetatable(object) == DeleteResult
 	end
