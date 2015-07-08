@@ -43,7 +43,6 @@ TestClient = {}
 		assert(has_database == true, "database does not exist after insert_one(...)")
 		
 		collection:drop()
-		
 		has_database = database:hasCollection("bar")
 		assert(has_database == false, "database did not get dropped")	
 	end
@@ -76,6 +75,18 @@ TestClient = {}
 		local objectId = ObjectId.new(result.inserted_id)
 		local check_result = collection:find_one({_id=result.inserted_id}	)
 		assert(table_eq(check_result, allDifferentTypes), "insert_one and find_one documents do not match")
+	end
+	
+	function TestClient:test_bad_key_in_document()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("bar")
+		
+		local arrayAsKey = { [{1}] = 1 }
+		local status, err = pcall(function() collection:insert_one(arrayAsKey) end)
+		local indexOfError = string.find(err, "invalid key type: table")
+		assert(status == false)
+		assert(indexOfError)
 	end
 	
 	function TestClient:test_insert_many()
@@ -142,6 +153,21 @@ TestClient = {}
 		end
 		
 		assert(numDocuments == 2, "inserted two documents and found a different number")
+		
+		-- Test finding 0 documents.
+		numDocuments = 0
+		results = collection:find({should_find_none=0})
+		for result in results do
+			numDocuments = numDocuments + 1
+		end
+		assert(numDocuments == 0)
+		
+		-- Test for error on a bad operation.
+		results = collection:find({a={["$bad_op"]=5}})
+		local status, err = pcall(function() for result in results do print(result) end end)
+		local indexOfError = string.find(err, "BadValue unknown operator: $bad_op")
+		assert(status == false)
+		assert(indexOfError)
 	end
 	
 	function TestClient:test_update_one()

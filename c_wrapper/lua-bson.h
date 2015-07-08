@@ -21,24 +21,23 @@
 #include "lua-mongoc-wrapper.h"
 #include "lua-object-generators.h"
 
-void find_and_set_or_create_id(lua_State *L,
+bool find_and_set_or_create_id(lua_State *L,
                                int index,
-                               bson_t *bson_doc);
+                               bson_t *bson_doc,
+                               bson_error_t *error);
 
 int lua_array_length(lua_State *L, int index);
 
-void lua_table_to_bson(lua_State *L,
+bool lua_table_to_bson(lua_State *L,
                        bson_t *bson_doc,
                        int index,
-                       bool generate_id);
+                       bool generate_id,
+                       bson_error_t *error);
 
-void lua_place_bson_field_value_on_top_of_stack(lua_State *L,
-                                                bson_t *bson_doc,
-                                                char *field);
-
-void bson_document_or_array_to_table(lua_State *L,
+bool bson_document_or_array_to_table(lua_State *L,
                                      bson_t *bson_doc,
-                                     bool is_table);
+                                     bool is_table,
+                                     bson_error_t *error);
 
 
 

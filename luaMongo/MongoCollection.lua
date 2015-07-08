@@ -16,12 +16,6 @@ limitations under the License.
 
 --]]
 
-ObjectId = require("ObjectId")
-BSONNull = require("BSONNull")
-InsertOneResult = require("resultObjects.InsertOneResult")
-InsertManyResult = require("resultObjects.InsertManyResult")
-UpdateResult = require("resultObjects.UpdateResult")
-
 local MongoCollection = {__mode="k"}
 MongoCollection.__index = MongoCollection
 
@@ -48,7 +42,6 @@ MongoCollection.__index = MongoCollection
 	end
 	
 	function createCursorIterator (collection, mongoCursor)
-		local fetch_one = nil
 		local cursor_t = mongoCursor
 		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
 		-- Table has to have relevant information in it, to prevent gc.
@@ -56,11 +49,8 @@ MongoCollection.__index = MongoCollection
 		setmetatable(mongoCursorPointer, {__mode = "k"})
 		
 		return function ()
-			fetch_one = mongoCursorPointer["cursor_t"]:next()
-			   if fetch_one then
-				   return fetch_one
-				end
-			 end
+                       return mongoCursorPointer["cursor_t"]:next()
+                   end
 	end
 	
 	function MongoCollection:find(query, fields)
