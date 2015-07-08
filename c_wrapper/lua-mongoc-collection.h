@@ -30,6 +30,8 @@ int lua_mongo_collection_find_one (lua_State *L);
 int lua_mongo_collection_insert_one (lua_State *L);
 int lua_mongo_collection_insert_many (lua_State *L);
 int lua_mongo_collection_update (lua_State *L);
+int lua_mongo_collection_delete_one(lua_State *L);
+int lua_mongo_collection_delete_many(lua_State *L);
 int lua_mongo_collection_destroy (lua_State *L);
 
 static const struct luaL_Reg lua_mongoc_collection_methods[] = {
@@ -41,6 +43,8 @@ static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_insert_many", lua_mongo_collection_insert_many },
     { "collection_update_one", lua_mongo_collection_update },
     { "collection_update_many", lua_mongo_collection_update },
+    { "collection_delete_one", lua_mongo_collection_delete_one },
+    { "collection_delete_many", lua_mongo_collection_delete_many },
     { "__gc", lua_mongo_collection_destroy },
     { NULL, NULL },
 };

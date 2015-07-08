@@ -17,12 +17,6 @@ limitations under the License.
 --]]
 
 package.path = package.path .. ';./luaMongo/?.lua;./test/?.lua;../luaMongo/?.lua'
-ObjectId = require("ObjectId")
-BSONNull = require("BSONNull")
-InsertOneResult = require("resultObjects.InsertOneResult")
-InsertManyResult = require("resultObjects.InsertManyResult")
-UpdateResult = require("resultObjects.UpdateResult")
-
 require('luaHelperFunctions')
 
 MongoClient = require("MongoClient")
@@ -233,6 +227,51 @@ TestClient = {}
 		assert(result.matched_count == 0)
 		assert(result.modified_count == 0)
 		assert(ObjectId.isObjectId(result.upserted_id))
+	end
+	
+	function TestClient:test_delete_one()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("test")
+		
+		collection:drop()
+		collection = database:getCollection("test")
+		
+		collection:insert_one({x = 1})
+		collection:insert_one({y = 1})
+		collection:insert_one({z = 1})
+		
+		local result = collection:delete_one({x = 1})
+		assert(DeleteResult.isDeleteResult(result))
+		assert(result.deleted_count == 1)
+		assert(result.acknowledged)
+		assert(collection:count() == 2)
+		
+		result = collection:delete_one({y = 1})
+		assert(DeleteResult.isDeleteResult(result))
+		assert(result.deleted_count == 1)
+		assert(result.acknowledged)
+		assert(collection:count() == 1)
+	end
+	
+	function TestClient:test_delete_many()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("test")
+		
+		collection:drop()
+		collection = database:getCollection("test")
+		
+		collection:insert_one({x = 1})
+		collection:insert_one({x = 1})
+		collection:insert_one({y = 1})
+		collection:insert_one({y = 1})
+		
+		local result = collection:delete_many({x = 1})
+		assert(DeleteResult.isDeleteResult(result))
+		assert(result.deleted_count == 2)
+		assert(result.acknowledged)
+		assert(collection:count() == 2)
 	end
 
 	function TestClient:test_count()

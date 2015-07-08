@@ -17,6 +17,13 @@ limitations under the License.
 --]]
 
 package.cpath = package.cpath .. ";./c_wrapper/build/?.dylib;../c_wrapper/build/?.dylib;./c_wrapper/build/?.so;../c_wrapper/build/?.so"
+ObjectId = require("ObjectId")
+BSONNull = require("BSONNull")
+InsertOneResult = require("resultObjects.InsertOneResult")
+InsertManyResult = require("resultObjects.InsertManyResult")
+UpdateResult = require("resultObjects.UpdateResult")
+DeleteResult = require("resultObjects.DeleteResult")
+
 MongoModule = require("mongo_module")
 local MongoDatabase = require("MongoDatabase")
 

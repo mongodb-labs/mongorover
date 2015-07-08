@@ -36,7 +36,7 @@ generate_ObjectID(lua_State *L,
     lua_getglobal(L, "ObjectId");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
-                 "ObjectId not a global variable",
+                 "ObjectId could not be imported",
                  sizeof (error->message));
         return false;
     }
@@ -159,7 +159,7 @@ generate_InsertOneResult(lua_State *L,
     lua_getglobal(L, "InsertOneResult");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
-                 "InsertOneResult not a global variable",
+                 "InsertOneResult could not be imported",
                  sizeof (error->message));
         return false;
     }
@@ -219,7 +219,7 @@ generate_InsertManyResult(lua_State *L,
 
     lua_getglobal(L, "InsertManyResult");
     if (!lua_istable(L, -1)) {
-        strncpy (error->message, "InsertManyResult not a gloabl variable",
+        strncpy (error->message, "InsertManyResult could not be imported",
                  sizeof (error->message));
         return false;
     }
@@ -264,6 +264,49 @@ generate_InsertManyResult(lua_State *L,
     // Remove global variable InsertManyResult off of the stack to maintain
     // stack integrity
     lua_remove (L, -2);
+
+    return true;
+}
+
+bool
+generate_DeleteResult(lua_State *L,
+                      bson_t *raw_result,
+                      bool acknowledged,
+                      bson_error_t *error) {
+    lua_getglobal(L, "DeleteResult");
+    if (!lua_istable(L, -1)) {
+        strncpy (error->message,
+                 "DeleteResult could not be imported",
+                 sizeof (error->message));
+        return false;
+    }
+
+    lua_getfield( L, -1, "new");
+    if (!lua_isfunction(L, -1)) {
+        strncpy (error->message,
+                 "DeleteResult does not have method 'new'",
+                 sizeof (error->message));
+        return false;
+    }
+
+    lua_pushboolean(L, acknowledged);
+
+    // Place raw_result on top of the stack
+    if (!(bson_document_or_array_to_table(L, raw_result, true, error))) {
+        //Maintain stack integrity.
+        lua_pop(L, 2);
+        return false;
+    }
+
+    if (lua_pcall(L, 2, 1, 0) != 0) {
+        strncpy (error->message,
+                 lua_tostring(L, -1),
+                 sizeof (error->message));
+        lua_pop(L, 1);
+        return false;
+    }
+
+    lua_remove(L, -2);
 
     return true;
 }
