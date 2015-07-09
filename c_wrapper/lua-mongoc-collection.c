@@ -442,6 +442,53 @@ DONE:
     return 1;
 }
 
+
+int lua_mongo_collection_aggregate (lua_State *L)
+{
+    collection_t *collection;
+    bson_t aggregation_pipeline = BSON_INITIALIZER;
+    bson_t inner_aggregation_pipeline = BSON_INITIALIZER;
+    mongoc_cursor_t *cursor = NULL;
+    bson_error_t error;
+    bool throw_error = false;
+
+    collection = (collection_t *)luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+    if (!(lua_istable(L, 2)) || !(lua_table_is_array(L, 2))) {
+        luaL_error(L, "aggregation pipeline must be an array");
+    } else {
+        bson_append_array_begin(&aggregation_pipeline, "pipeline", -1,
+                                &inner_aggregation_pipeline);
+
+        if (!(lua_table_to_bson(L, &inner_aggregation_pipeline, 2, false, &error))) {
+            throw_error = true;
+            goto DONE;
+        }
+
+        bson_append_array_end(&aggregation_pipeline, &inner_aggregation_pipeline);
+    }
+
+    cursor = mongoc_collection_aggregate (collection->c_collection, MONGOC_QUERY_NONE,
+                                          &aggregation_pipeline,
+                                          NULL, NULL);
+
+DONE:
+    bson_destroy(&aggregation_pipeline);
+    bson_destroy(&inner_aggregation_pipeline);
+
+    if (throw_error) {
+        if (cursor) {
+            mongoc_cursor_destroy (cursor);
+        }
+        luaL_error(L, error.message);
+    }
+
+    lua_mongo_cursor_new(L, cursor);
+
+    return 1;
+}
+
+
 int
 lua_mongo_collection_delete_one(lua_State *L)
 {

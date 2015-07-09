@@ -52,7 +52,7 @@ lua_mongo_cursor_iterate(lua_State *L)
     cursor = (lua_mongo_cursor_t *)luaL_checkudata(L, 1, "lua_mongo_cursor");
 
     if (mongoc_cursor_next(cursor->c_cursor, &doc)) {
-        if (!(bson_document_or_array_to_table (L, doc, false, &error))) {
+        if (!(bson_document_or_array_to_table (L, doc, true, &error))) {
             throw_error = true;
         }
 

@@ -54,7 +54,7 @@ MongoCollection.__index = MongoCollection
 	end
 	
 	function MongoCollection:find(query, fields)
-		cursor_t = self.collection_t:collection_find(self, query, fields)
+		local cursor_t = self.collection_t:collection_find(self, query, fields)
 		return createCursorIterator(self, cursor_t)
 	end
 	
@@ -91,8 +91,9 @@ MongoCollection.__index = MongoCollection
 		return self.collection_t:collection_delete_many(selector)
 	end
 	
-	function MongoCollection:makeRandomObjectId()
-		return self.collection_t:make_random_object_id()
+	function MongoCollection:aggregate(aggregationPipeline)
+		local cursor_t = self.collection_t:collection_aggregate(aggregationPipeline)
+		return createCursorIterator(self, cursor_t)
 	end
-	
+
 return MongoCollection

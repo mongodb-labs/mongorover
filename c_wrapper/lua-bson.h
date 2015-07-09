@@ -21,6 +21,8 @@
 #include "lua-mongoc-wrapper.h"
 #include "lua-object-generators.h"
 
+bool lua_table_is_array(lua_State *L, int index);
+
 bool find_and_set_or_create_id(lua_State *L,
                                int index,
                                bson_t *bson_doc,
