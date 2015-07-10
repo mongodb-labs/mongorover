@@ -16,6 +16,12 @@ limitations under the License.
 
 --]]
 
+---
+-- @submodule mongorover.luaBSONObjects
+
+--- Lua Object representing ObjectId.
+-- @type ObjectId
+
 local ObjectId = {}
 ObjectId.__index = ObjectId
 
@@ -23,19 +29,27 @@ ObjectId.__index = ObjectId
 		return "ObjectID(\"" .. self.key .. "\")"
 	end
 
-	--- Creates a MongoClient instance.
-	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
-	-- @param db_uri The MongoDB connection URI.
+	---
+	-- Creates an ObjectId object with the corresponding key.
+	-- @tparam string key A hexadecimal string representation of the ObjectId of length 24.
 	function ObjectId.new(key)
+		assert(string.len(key) == 24, "key parameter must be a hexidecimal string representing an ObjectId with length of 24.")
 		local self = setmetatable({}, ObjectId)
 		self.key = key
 		return self
 	end
 	
-	function ObjectId.isObjectId(o)
-		return getmetatable(o) == ObjectId
+	---
+	-- Checks whether the object is a ObjectId object or not.
+	-- @param object The object to be checked whether it is an ObjectId.
+	-- @treturn bool Whether the object is an ObjectId or not.
+	function ObjectId.isObjectId(object)
+		return getmetatable(object) == ObjectId
 	end
 	
+	---
+	-- Returns hexidecimal string representation of the ObjectId.
+	-- @treturn String hexidecimal string representation of the ObjectId.
 	function ObjectId:getKey()
 		return self.key
 	end

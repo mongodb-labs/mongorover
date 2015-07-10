@@ -76,3 +76,5 @@ luac.out
 build/
 .idea/
 Testing/
+doc/
+build.luarocks/

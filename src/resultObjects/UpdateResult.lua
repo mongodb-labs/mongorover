@@ -16,6 +16,12 @@ limitations under the License.
 
 --]]
 
+---
+-- @submodule mongorover.resultObjects
+
+--- The return type for update_one() and update_many().
+--@type UpdateResult
+
 local UpdateResult = {}
 UpdateResult.__index = UpdateResult
 	
@@ -26,9 +32,9 @@ UpdateResult.__index = UpdateResult
 		return ret
 	end
 
-	--- Creates a MongoClient instance.
-	-- uses MongoDB connection URI (http://docs.mongodb.org/manual/reference/connection-string/).
-	-- @param db_uri The MongoDB connection URI.
+	---
+	-- Creates an UpdateOneResult instance.
+	-- @tparam table raw_result The response from the server after an update converted to a Lua table.
 	function UpdateResult.new(raw_result)
 		local self = setmetatable({}, UpdateResult)
 		--'matched_count', 'modified_count', 'raw_result', 'upserted_id'
@@ -41,8 +47,12 @@ UpdateResult.__index = UpdateResult
 		return self
 	end
 	
-	function UpdateResult.isUpdateResult(o)
-		return getmetatable(o) == UpdateResult
+	---
+	-- Checks whether object is an UpdateResult or not.
+	-- @param object The object to be checked whether it is an UpdateResult.
+	-- @treturn bool Whether the object is an UpdateResult or not.
+	function UpdateResult.isUpdateResult(object)
+		return getmetatable(object) == UpdateResult
 	end
 	
 	UpdateResult.__tostring = UpdateResult.__tostringx    

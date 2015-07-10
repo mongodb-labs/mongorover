@@ -16,6 +16,5 @@ limitations under the License.
 
 --]]
 
-package.path = package.path .. ';./luaMongo/?.lua;./test/?.lua;../luaMongo/?.lua';
 require('test_client')
 require('test_collection')
