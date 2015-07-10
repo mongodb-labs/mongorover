@@ -28,13 +28,25 @@ bool find_and_set_or_create_id(lua_State *L,
                                bson_t *bson_doc,
                                bson_error_t *error);
 
-int lua_array_length(lua_State *L, int index);
-
 bool lua_table_to_bson(lua_State *L,
                        bson_t *bson_doc,
                        int index,
-                       bool generate_id,
+                       bool _id_required,
                        bson_error_t *error);
+
+bool add_lua_table_contents_to_bson_doc(lua_State *L,
+                                        bson_t *bson_doc,
+                                        int index,
+                                        bool _id_required,
+                                        bson_error_t *error);
+
+int lua_array_length(lua_State *L, int index);
+
+bool append_stack_value_to_bson_doc(lua_State *L,
+                        bson_t *bson_doc,
+                        const char *key,
+                        int index,
+                        bson_error_t *error);
 
 bool bson_document_or_array_to_table(lua_State *L,
                                      bson_t *bson_doc,

@@ -15,8 +15,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 --]]
-package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
-MongoClient = require("MongoClient")
+
+dofile("setReleaseType.lua")
+if _G["_MONGOROVER_RELEASE"] then
+	MongoClient = require("mongorover.MongoClient")
+else
+	package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
+	MongoClient = require("MongoClient")
+end
+
 LuaUnit = require("luaunit")
 
 TestClient = {}

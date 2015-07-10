@@ -16,12 +16,17 @@ limitations under the License.
 
 --]]
 
-package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
+dofile("setReleaseType.lua")
+if _G["_MONGOROVER_RELEASE"] then
+	MongoClient = require("mongorover.MongoClient")
+	MongoCollection = require("mongorover.MongoCollection")
+else
+	package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
+	MongoClient = require("MongoClient")
+	MongoCollection = require("MongoCollection")
+end
 
 require('luaHelperFunctions')
-
-MongoClient = require("MongoClient")
-local MongoCollection = require("MongoCollection")
 LuaUnit = require("luaunit")
 
 TestClient = {}

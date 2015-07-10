@@ -16,13 +16,11 @@ limitations under the License.
 
 --]]
 
--- True when a release version in luarocks. Set to false to manually use cmake and develop/debug locally.
-_G["RELEASE"] = true
+local mongorover_environment = _G["_MONGOROVER_RELEASE"]
 
 -- Keep MongoDatabase local.
 local MongoDatabase = nil
-
-if _G["RELEASE"] then
+if mongorover_environment == nil or mongorover_environment then
 	MongoModule = require("mongo_module")
 	MongoDatabase = require("mongorover.MongoDatabase")
 
@@ -33,7 +31,8 @@ if _G["RELEASE"] then
 	UpdateResult = require("mongorover.resultObjects.UpdateResult")
 	DeleteResult = require("mongorover.resultObjects.DeleteResult")
 else
-	package.cpath = package.cpath .. ";./c_wrapper/build/?.dylib;../c_wrapper/build/?.dylib;./c_wrapper/build/?.so;../c_wrapper/build/?.so"
+	-- Overwrite cpath to ensure only the locally created debug build is imported.
+	package.cpath = "../c_wrapper/build/?.dylib"
 	MongoModule = require("mongo_module")
 	MongoDatabase = require("MongoDatabase")
 
@@ -44,9 +43,6 @@ else
 	UpdateResult = require("resultObjects/UpdateResult")
 	DeleteResult = require("resultObjects/DeleteResult")
 end
-	
-
-
 
 --- Tools for connecting to MongoDB.
 -- @module mongorover.MongoClient

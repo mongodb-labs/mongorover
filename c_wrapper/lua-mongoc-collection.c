@@ -374,7 +374,7 @@ lua_mongo_collection_insert_many (lua_State *L)
     mongoc_bulk_operation_t *bulk_insert = NULL;
     bool ordered;
     bson_error_t error;
-    bson_t reply;
+    bson_t reply = BSON_INITIALIZER;
     bool ret;
     bool throw_error = false;
 

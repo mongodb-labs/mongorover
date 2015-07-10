@@ -17,7 +17,6 @@
 #include "lua-mongoc-client.h"
 #include "lua-mongoc-database.h"
 
-
 int
 lua_mongo_database_new(lua_State *L)
 {
@@ -107,6 +106,68 @@ lua_mongo_database_has_collection (lua_State *L)
     lua_pushboolean(L, has_collection);
 
     return 1;
+}
+
+
+int
+lua_mongo_database_command_simple (lua_State *L) {
+    database_t *database;
+    char *command_name;
+    bson_t command = BSON_INITIALIZER;
+    bson_t reply = BSON_INITIALIZER;
+    bson_error_t error;
+    bool throw_error = false;
+
+    database = (database_t *)luaL_checkudata(L, 1, "lua_mongoc_database");
+
+    command_name = luaL_checkstring(L, 2);
+    if (command_name == NULL) {
+        luaL_error(L, "command_name must be a string");
+    }
+
+    // If user does not put in value, it defaults to 1. Assume this will
+    // always be a value to append to the bson document.
+    if (!(append_stack_value_to_bson_doc(L, &command, command_name,
+                                         3, &error))) {
+        throw_error = true;
+        goto DONE;
+    }
+
+    if (lua_istable(L, 4)) {
+        if (!(add_lua_table_contents_to_bson_doc(L, &command, 4, false, &error))) {
+            throw_error = true;
+            goto DONE;
+        }
+    } else if (!(lua_isnil(L, 4))) {
+        throw_error = true;
+        strncpy (error.message,
+                 "options parameter can only be a table or nil value",
+                 sizeof (error.message));
+        goto DONE;
+    }
+
+    if (!(mongoc_database_command_simple(database->c_database, &command,
+                                         NULL,
+                                         &reply, &error))) {
+        throw_error = true;
+        goto DONE;
+    }
+
+    if (!(bson_document_or_array_to_table(L, &reply, true, &error))) {
+        throw_error = true;
+        goto DONE;
+    }
+
+DONE:
+    bson_destroy(&command);
+    bson_destroy(&reply);
+
+    if (throw_error) {
+        luaL_error(L, error.message);
+    }
+
+    return 1;
+
 }
 
 

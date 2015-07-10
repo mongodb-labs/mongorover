@@ -49,7 +49,7 @@ package = "mongorover"
      modules = {
         mongorover = "mongorover.lua",
 
-        mongo_module = {
+        ["mongo_module"] = {
           sources = {"c_wrapper/mongo-module.c", "c_wrapper/lua-mongoc-client.c", "c_wrapper/lua-mongoc-database.c", "c_wrapper/lua-mongoc-collection.c", "c_wrapper/lua-bson.c", "c_wrapper/lua-version-compat.c", "c_wrapper/lua-object-generators.c", "c_wrapper/lua-mongo-cursor.c"},
           libraries = {"lua", "mongoc-1.0", "bson-1.0"},
           incdirs = {"$(LIBLUA_INCDIR)", "$(LIBMONGOC_INCDIR)/libmongoc-1.0", "$(LIBBSON_INCDIR)/libbson-1.0"},

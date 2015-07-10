@@ -21,7 +21,6 @@ limitations under the License.
 
 --- Collection level utilities for Mongo.
 -- @type mongorover.MongoCollection
-
 local MongoCollection = {__mode="k"}
 MongoCollection.__index = MongoCollection
 
