@@ -16,8 +16,10 @@ limitations under the License.
 
 --]]
 
+local mongorover_environment = _G["_MONGOROVER_RELEASE"]
+
 local MongoCollection = nil
-if _G["RELEASE"] then
+if mongorover_environment == nil or mongorover_environment then
 	MongoCollection = require("mongorover.MongoCollection")
 else
 	MongoCollection = require("MongoCollection")
@@ -69,12 +71,25 @@ MongoDatabase.__index = MongoDatabase
 		self.database_t = nil
 	end
 	
-	--- Returns boolean whether the collection is present in the database.
+	---
+	-- Returns boolean whether the collection is present in the database.
 	-- @tparam string collectionName The name of the database.
 	-- @treturn boolean A boolean value whether the database has the collection.
 	function MongoDatabase:hasCollection(collectionName)
 		ret = self.database_t:has_collection(collectionName)
 		return ret
+	end
+	
+	---
+	-- Issue a command to MongoDB by and get response back.
+	-- @tparam string command 
+	-- @param[opt] value Value for command. Defaults to 1.
+	-- @tparam table options Additional options for database command.
+	-- @treturn table Response from server.
+	function MongoDatabase:command(command, value, options)
+		value = value or 1
+		code_options = code_options or nil
+		return self.database_t:command_simple(command, value, options)
 	end
 
 return MongoDatabase

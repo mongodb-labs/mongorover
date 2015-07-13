@@ -19,10 +19,11 @@
 int _convert_to_absolute_stack_index(lua_State *L,
                                      int index);
 
-bool _append_to_bson_doc(lua_State *L,
-                         bson_t *bson_doc,
-                         const char *key,
-                         bson_error_t *error);
+bool _add_lua_table_contents_to_bson_doc(lua_State *L,
+                                         bson_t *bson_doc,
+                                         int index,
+                                         bool generate_id,
+                                         bson_error_t *error);
 
 bool _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                                                         int index,
@@ -94,54 +95,55 @@ lua_array_length(lua_State *L, int index)
 }
 
 /**
- * _append_to_bson_doc
+ * append_stack_value_to_bson_doc
  * @L: A lua_State.
  * @bson_doc: A bson_t.
  * @key: A const char *.
+ * @index: An int.
  * @error: A bson_error_t.
  *
- * While iterating through a table, key and value will be at the top of the
- * stack. This function takes the top value off of the stack, which should be
- * the value and converts it to its appropriate bson form and adds it to the
- * bson_doc.
+ * This function takes the value at the given stack index and converts it
+ * to its appropriate bson form and adds it to the bson_doc.
  *
  * Returns false if error occurred. Error propagated through the bson_error_t.
  */
 
 bool
-_append_to_bson_doc (lua_State *L,
-                     bson_t *bson_doc,
-                     const char *key,
-                     bson_error_t *error)
+append_stack_value_to_bson_doc (lua_State *L,
+                                bson_t *bson_doc,
+                                const char *key,
+                                int index,
+                                bson_error_t *error)
 {
-    switch (lua_type(L, -1)) {
+    int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
+    switch (lua_type(L, absolute_stack_index)) {
         case LUA_TBOOLEAN: {
-            bool bool_value = lua_toboolean(L, -1);
+            bool bool_value = lua_toboolean(L, absolute_stack_index);
             bson_append_bool(bson_doc, key, -1, bool_value);
             break;
         };
         case LUA_TNUMBER: {
-            lua_Number double_value = lua_tonumber(L, -1);
+            lua_Number double_value = lua_tonumber(L, absolute_stack_index);
             bson_append_double(bson_doc, key, -1, double_value);
             break;
         };
         case LUA_TSTRING: {
-            const char *value;
-            value = lua_tostring(L, -1);
+            char *value;
+            value = lua_tostring(L, absolute_stack_index);
             bson_append_utf8(bson_doc, key, -1, value, -1);
             break;
         };
         case LUA_TTABLE: {
 
-            if (is_ObjectId(L, -1)) {
+            if (is_ObjectId(L, absolute_stack_index)) {
                 const char *object_id_key;
                 bson_oid_t oid;
 
-                lua_getfield( L, -1, "getKey");
+                lua_getfield( L, absolute_stack_index, "getKey");
                 if (lua_isfunction(L, -1)) {
 
                     // Copy ObjectId on the stack as an input so we can use it as "self".
-                    lua_pushvalue(L, -2);
+                    lua_pushvalue(L, absolute_stack_index);
                     if (lua_pcall(L, 1, 1, 0) != 0) {
                         strncpy (error->message,
                                  lua_tostring(L, -1),
@@ -162,20 +164,20 @@ _append_to_bson_doc (lua_State *L,
                 } else {
                     luaL_error(L, "ObjectId does not have method getKey");
                 }
-            } else if (is_BSONNull(L, -1)) {
+            } else if (is_BSONNull(L, absolute_stack_index)) {
                 bson_append_null(bson_doc, key, -1);
             } else {
 
                 bson_t subdocument;
-                if (lua_table_is_array(L, -1)) {
+                if (lua_table_is_array(L, absolute_stack_index)) {
                     bson_append_array_begin(bson_doc, key, -1, &subdocument);
-                    if (!(lua_table_to_bson(L, &subdocument, -1, false, error))) {
+                    if (!(lua_table_to_bson(L, &subdocument, absolute_stack_index, false, error))) {
                         return false;
                     }
                     bson_append_array_end(bson_doc, &subdocument);
                 } else {
                     bson_append_document_begin(bson_doc, key, -1, &subdocument);
-                    if(!(lua_table_to_bson(L, &subdocument, -1, false, error))) {
+                    if(!(lua_table_to_bson(L, &subdocument, absolute_stack_index, false, error))) {
                         return false;
                     }
                     bson_append_document_end(bson_doc, &subdocument);
@@ -186,7 +188,7 @@ _append_to_bson_doc (lua_State *L,
         default: {
             bson_snprintf(error->message, sizeof(error->message),
                           "invalid value type: %s",
-                          lua_typename(L, lua_type(L, -2)));
+                          lua_typename(L, lua_type(L, absolute_stack_index)));
             return false;
         }
     }
@@ -225,7 +227,7 @@ find_and_set_or_create_id(lua_State *L,
     lua_gettable(L, absolute_stack_index);
 
     if (!lua_isnil(L, -1)) {
-        if (!(_append_to_bson_doc(L, bson_doc, "_id", error))) {
+        if (!(append_stack_value_to_bson_doc(L, bson_doc, "_id", -1, error))) {
             lua_pop(L, 1);
             return false;
         }
@@ -249,7 +251,80 @@ find_and_set_or_create_id(lua_State *L,
 
 
 /**
- * lua_table_to_bson
+ *
+ * Converts a lua table to bson. Pre-validation function for
+ * _add_lua_table_contents_to_bson_doc( ... ) by checking that the bson document
+ * passed in is empty.
+ *
+ * @L: A lua_State.
+ * @bson_doc: A bson_t.
+ * @_id_required: A boolean.
+ * @id_field_in_doc: A boolean.
+ * @error: A bson_error_t.
+ */
+bool
+lua_table_to_bson(lua_State *L,
+                  bson_t *bson_doc,
+                  int index,
+                  bool _id_required,
+                  bson_error_t *error)
+{
+    if (!(bson_empty(bson_doc))) {
+        strncpy(error->message,
+                "bson_document passed to lua_table_to_bson is not empty. To "
+                        "append a table's contents to a bson document, use "
+                        "add_lua_table_contents_to_bson_doc",
+                sizeof(error->message));
+        return false;
+    }
+
+    if (!(_add_lua_table_contents_to_bson_doc(L, bson_doc, index, _id_required, error))) {
+        return false;
+    }
+
+    return true;
+}
+
+
+/**
+ *
+ * Appends lua table contents to bson document, regardless of it the bson
+ * document is empty or not. Checks that the bson document is valid before
+ * returning.
+ *
+ * @L: A lua_State.
+ * @bson_doc: A bson_t.
+ * @_id_required: A boolean.
+ * @id_field_in_doc: A boolean.
+ * @error: A bson_error_t.
+ */
+bool
+add_lua_table_contents_to_bson_doc(lua_State *L,
+                                   bson_t *bson_doc,
+                                   int index,
+                                   bool _id_required,
+                                   bson_error_t *error)
+{
+    size_t offset;
+
+    if (!(_add_lua_table_contents_to_bson_doc(L, bson_doc, index, _id_required, error))) {
+        return false;
+    }
+
+    if (!(bson_validate(bson_doc, BSON_VALIDATE_NONE, &offset))) {
+        strncpy(error->message,
+                "adding lua table to bson document caused malformed bson "
+                        "document",
+                sizeof(error->message));
+        return false;
+    }
+
+    return true;
+}
+
+
+/**
+ * _add_lua_table_contents_to_bson_doc
  * @L: A lua_State.
  * @bson_doc: A bson_t.
  * @_id_required: A boolean.
@@ -268,11 +343,11 @@ find_and_set_or_create_id(lua_State *L,
  */
 
 bool
-lua_table_to_bson(lua_State *L,
-                  bson_t *bson_doc,
-                  int index,
-                  bool _id_required,
-                  bson_error_t *error)
+_add_lua_table_contents_to_bson_doc(lua_State *L,
+                                    bson_t *bson_doc,
+                                    int index,
+                                    bool _id_required,
+                                    bson_error_t *error)
 {
     // index: relative or absolute position of table on the stack being
     // converted
@@ -349,10 +424,11 @@ lua_table_to_bson(lua_State *L,
                     }
                 }
 
-                if (!(_append_to_bson_doc(L, bson_doc, key, error))) {
+                if (!(append_stack_value_to_bson_doc(L, bson_doc, key, -1, error))) {
                     lua_pop(L, 1);
                     return false;
                 }
+
                 break;
             }
             default: {
