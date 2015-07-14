@@ -1,7 +1,7 @@
 ==========
 mongorover
 ==========
-:Info: See `the mongo site <http://www.mongodb.org>`_ for more information. See `github <http://github.com/mongodb/mongo-python-driver/tree>`_ for the latest source.
+:Info: See `the mongo site <http://www.mongodb.org>`_ for more information. See `github <https://github.com/10gen-labs/mongorover>`_ for the latest source.
 :Author: Christopher Wang
 :Maintainer: Jesse Davis
 
