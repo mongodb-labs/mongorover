@@ -17,16 +17,17 @@ limitations under the License.
 --]]
 
 package = "mongorover"
- version = "0.0-1"
+ version = "0.1-1"
  source = {
-    url = "https://github.com/mongodbinc-interns/mongo-lua-driver"
+    url = "https://github.com/10gen-labs/mongorover",
+    tag = "0.1",
  }
  description = {
-    summary = "A simple Lua driver for MongoDB",
+    summary = "A Lua driver for MongoDB.",
     detailed = [[
-       A Lua driver that wraps the mongo-c-driver. It currently supports the simple CRUD operations and aggregation.
+       A Lua driver for MongoDB that currently supports the simple CRUD operations, aggregation, and simple commands. It wraps the new MongoDB C driver and conforms to the newly released CRUD specifications.
     ]],
-    homepage = "", -- not up yet
+    homepage = "http://api.mongodb.org/lua/current/",
     license = "Apache"
  }
  dependencies = {
