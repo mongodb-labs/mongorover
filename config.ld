@@ -19,6 +19,8 @@ limitations under the License.
 
 file = {"src"}
 examples = {'examples'}
+style = "ldoc_custom_files"
+template = false
 title = "Mongo Rover Documentation"
 project = "mongorover"
 description = "Simple Lua Driver for MongoDB."
