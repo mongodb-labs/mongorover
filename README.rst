@@ -66,12 +66,9 @@ The mongorover distribution is supported and tested on Lua 5.1.5 and 5.2.3.
 
 Additional dependencies are:
 
-- (for C bindings to interface with MongoDB) `MongoDB C Driver <https://github.com/mongodb/mongo-c-driver/tree/1.2.0-dev>`_
-
-- (to generate documentation) `ldoc <https://github.com/stevedonovan/LDoc>`_
-    - (ldoc dependency): `Penlight <https://github.com/stevedonovan/Penlight>`_
-        - (Penlight dependency) `LuaFileSystem <http://keplerproject.github.io/luafilesystem/>`_
-- (to run the tests) `luaunit <https://github.com/bluebird75/luaunit>`_
+- `MongoDB C Driver <https://github.com/mongodb/mongo-c-driver/tree/1.2.0-dev>`_
+- To generate documentation: `ldoc <https://github.com/stevedonovan/LDoc>`_
+- To run the tests: `luaunit <https://github.com/bluebird75/luaunit>`_
 
 Examples
 ========
