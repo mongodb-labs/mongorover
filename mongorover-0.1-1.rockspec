@@ -19,8 +19,8 @@ limitations under the License.
 package = "mongorover"
  version = "0.1-1"
  source = {
-    url = "https://github.com/10gen-labs/mongorover",
-    tag = "0.1",
+    url = "git://github.com/10gen-labs/mongorover",
+    tag = "0.1"
  }
  description = {
     summary = "A Lua driver for MongoDB.",
@@ -48,7 +48,6 @@ package = "mongorover"
  build = {
     type = "builtin",
      modules = {
-        mongorover = "mongorover.lua",
 
         ["mongo_module"] = {
           sources = {"c_wrapper/mongo-module.c", "c_wrapper/lua-mongoc-client.c", "c_wrapper/lua-mongoc-database.c", "c_wrapper/lua-mongoc-collection.c", "c_wrapper/lua-bson.c", "c_wrapper/lua-version-compat.c", "c_wrapper/lua-object-generators.c", "c_wrapper/lua-mongo-cursor.c"},
@@ -56,6 +55,8 @@ package = "mongorover"
           incdirs = {"$(LIBLUA_INCDIR)", "$(LIBMONGOC_INCDIR)/libmongoc-1.0", "$(LIBBSON_INCDIR)/libbson-1.0"},
           libdirs = {"$(LIBLUA_LIBDIR)", "$(LIBMONGOC_LIBDIR)", "$(LIBBSON_LIBDIR)"}
         },
+
+        mongorover = "mongorover.lua",
 
         ["mongorover.MongoClient"] = "src/MongoClient.lua",
         ["mongorover.MongoDatabase"] = "src/MongoDatabase.lua",
