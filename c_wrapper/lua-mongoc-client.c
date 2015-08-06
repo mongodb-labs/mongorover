@@ -46,6 +46,7 @@ lua_mongo_client_get_database_names(lua_State *L)
     bson_error_t error;
     client_t *client;
     int num_databases;
+    int i;
 
     client = (client_t *)luaL_checkudata(L, 1, "lua_mongoc_client");
 
@@ -53,7 +54,7 @@ lua_mongo_client_get_database_names(lua_State *L)
     if (database_names) {
         for (num_databases = 0; database_names[num_databases]; num_databases++);
         lua_createtable(L, 0, num_databases);
-        for (int i = 0; i < num_databases; i++) {
+        for (i = 0; i < num_databases; i++) {
             //lua indexes start at 1
             lua_pushinteger(L, i + 1);
             lua_pushstring(L, database_names[i]);
