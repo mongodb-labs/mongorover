@@ -216,6 +216,7 @@ generate_InsertManyResult(lua_State *L,
 {
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
     int lua_index;
+    int i;
 
     lua_getglobal(L, "InsertManyResult");
     if (!lua_istable(L, -1)) {
@@ -241,7 +242,7 @@ generate_InsertManyResult(lua_State *L,
     // Place array of inserted _ids onto the top of the stack.
     lua_newtable(L);
 
-    for (int i=0, lua_index=1; i < num_elements; i++, lua_index++) {
+    for (i=0, lua_index=1; i < num_elements; i++, lua_index++) {
         lua_rawgeti(L, absolute_stack_index, lua_index);
         lua_pushstring(L, "_id");
         lua_gettable(L, -2);

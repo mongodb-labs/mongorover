@@ -48,6 +48,7 @@ lua_mongo_database_get_collection_names (lua_State *L)
     int num_collections;
     char **collection_names;
     bson_error_t error;
+    int i;
 
     database = (database_t *)luaL_checkudata(L, 1, "lua_mongoc_database");
 
@@ -55,7 +56,7 @@ lua_mongo_database_get_collection_names (lua_State *L)
     if (collection_names) {
         for (num_collections = 0; collection_names[num_collections]; num_collections++);
         lua_createtable(L, 0, num_collections);
-        for (int i = 0; i < num_collections; i++) {
+        for (i = 0; i < num_collections; i++) {
             //lua indexes start at 1
             lua_pushinteger(L, i + 1);
             lua_pushstring(L, collection_names[i]);

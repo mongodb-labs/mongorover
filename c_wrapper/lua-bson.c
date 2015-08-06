@@ -458,7 +458,8 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
 bool
 bson_is_array(bson_iter_t iter)
 {
-    for (int i=0; bson_iter_next(&iter); i++) {
+    int i;
+    for (i=0; bson_iter_next(&iter); i++) {
         const char *key = bson_iter_key(&iter);
         long ret = strtol(key, NULL, 10);
         if (ret != i) {
@@ -534,7 +535,8 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
 {
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
 
-    for (int i=0; bson_iter_next(iter); i++) {
+    int i;
+    for (i=0; bson_iter_next(iter); i++) {
         const char *key;
         const bson_value_t *value;
 
