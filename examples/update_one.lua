@@ -1,10 +1,7 @@
-local MongoClient = require("luaMongo.MongoClient")
+local MongoClient = require("mongorover.MongoClient")
 local client = MongoClient.new("mongodb://localhost:27017/")
-local BSONNull = require("luaMongo.luaBSONObjects.BSONNull")
 local exampleDatabase = client:getDatabase("exampleDB")
 local exampleCollection = exampleDatabase:getCollection("exampleCollection")
-
-local exampleCollection = client.exampleDB.exampleCollection
 
 -- Drop database to get a clean slate for this example.
 exampleCollection:drop()
