@@ -39,20 +39,7 @@ MongoDB project, please report it according to the `instructions here
 Installation
 ============
 
-Before installing mongorover, you have to install both the MongoDB C Driver and the libbson library. The tested MongoDB C driver is the 1.2.0-dev branch which currently can only be installed from source. On Mac/Linux, it could be done like so:
-
-.. code:: bash
-
-  $ git clone https://github.com/mongodb/mongo-c-driver.git
-  $ cd mongo-c-driver
-  $ git checkout 1.2.0-dev
-  $ git submodule update
-  $ ./autogen.sh
-  $ make
-  $ sudo make install
-
-If there are errors, you can refer to the `Mongo C Driver install guide <http://api.mongodb.org/c/current/installing.html#build-yourself>`_. If building on Windows, please refer to the Window specific section.
-
+Before installing mongorover, you have to install the MongoDB C Driver version 1.2, which is in beta at the time of this writing. Please download the latest 1.2 beta release from `the C Driver releases page <https://github.com/mongodb/mongo-c-driver/releases>`_ and follow the `Mongo C Driver installation guide <http://api.mongodb.org/c/current/installing.html#build-yourself>`_. If building on Windows, please refer to the Window specific section.
 
 After installing the above C libraries successfully, if you have `luarocks
 <https://luarocks.org/>`_ installed you
