@@ -25,19 +25,16 @@ package = "mongorover"
  description = {
     summary = "A Lua driver for MongoDB.",
     detailed = [[
-       A Lua driver for MongoDB that currently supports the simple CRUD operations, aggregation, and simple commands. It wraps the new MongoDB C driver and conforms to the newly released CRUD specifications.
+       A Lua driver for MongoDB that currently supports the simple CRUD operations, aggregation, and simple commands. It wraps the 1.2.0 MongoDB C driver and conforms to the newly released CRUD specifications.
     ]],
     homepage = "http://api.mongodb.org/lua/current/",
-    license = "Apache"
+    license = "Apache",
+    maintainer = "Jesse Davis <jesse@mongodb.com>"
  }
  dependencies = {
     "lua >= 5.1, < 5.3"
-    -- If you depend on other rocks, add them here
  }
  external_dependencies = {
-    LIBLUA = {
-      header = "lua.h"
-    },
     LIBMONGOC = {
       header = "libmongoc-1.0/mongoc.h"
     },
@@ -51,9 +48,9 @@ package = "mongorover"
 
         ["mongo_module"] = {
           sources = {"c_wrapper/mongo-module.c", "c_wrapper/lua-mongoc-client.c", "c_wrapper/lua-mongoc-database.c", "c_wrapper/lua-mongoc-collection.c", "c_wrapper/lua-bson.c", "c_wrapper/lua-version-compat.c", "c_wrapper/lua-object-generators.c", "c_wrapper/lua-mongo-cursor.c"},
-          libraries = {"lua", "mongoc-1.0", "bson-1.0"},
-          incdirs = {"$(LIBLUA_INCDIR)", "$(LIBMONGOC_INCDIR)/libmongoc-1.0", "$(LIBBSON_INCDIR)/libbson-1.0"},
-          libdirs = {"$(LIBLUA_LIBDIR)", "$(LIBMONGOC_LIBDIR)", "$(LIBBSON_LIBDIR)"}
+          libraries = {"mongoc-1.0", "bson-1.0"},
+          incdirs = {"$(LIBMONGOC_INCDIR)/libmongoc-1.0", "$(LIBBSON_INCDIR)/libbson-1.0"},
+          libdirs = {"$(LIBMONGOC_LIBDIR)", "$(LIBBSON_LIBDIR)"}
         },
 
         mongorover = "mongorover.lua",
