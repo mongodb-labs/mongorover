@@ -16,33 +16,22 @@ limitations under the License.
 
 --]]
 
-local mongorover_environment = _G["_MONGOROVER_RELEASE"]
-
--- Keep MongoDatabase local.
-local MongoDatabase = nil
-if mongorover_environment == nil or mongorover_environment then
-	MongoModule = require("mongo_module")
-	MongoDatabase = require("mongorover.MongoDatabase")
-
-	ObjectId = require("mongorover.luaBSONObjects.ObjectId")
-	BSONNull = require("mongorover.luaBSONObjects.BSONNull")
-	InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
-	InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
-	UpdateResult = require("mongorover.resultObjects.UpdateResult")
-	DeleteResult = require("mongorover.resultObjects.DeleteResult")
-else
+local importPrepend = ""
+if _G["__MONGOROVER_TEST_ENVIRONMENT"] then
 	-- Overwrite cpath to ensure only the locally created debug build is imported.
-	package.cpath = "../c_wrapper/build/?.dylib"
-	MongoModule = require("mongo_module")
-	MongoDatabase = require("MongoDatabase")
-
-	ObjectId = require("luaBSONObjects/ObjectId")
-	BSONNull = require("luaBSONObjects/BSONNull")
-	InsertOneResult = require("resultObjects/InsertOneResult")
-	InsertManyResult = require("resultObjects/InsertManyResult")
-	UpdateResult = require("resultObjects/UpdateResult")
-	DeleteResult = require("resultObjects/DeleteResult")
+	package.cpath = "../?.dylib;../?.so"
+else
+	importPrepend = "mongorover."
 end
+
+MongoModule = require("mongo_module")
+local MongoDatabase = require(importPrepend .. "MongoDatabase")
+ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
+BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
+InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
+InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
+UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
+DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
 
 --- Tools for connecting to MongoDB.
 -- @module mongorover.MongoClient

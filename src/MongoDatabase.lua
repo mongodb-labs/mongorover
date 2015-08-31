@@ -16,14 +16,12 @@ limitations under the License.
 
 --]]
 
-local mongorover_environment = _G["_MONGOROVER_RELEASE"]
-
-local MongoCollection = nil
-if mongorover_environment == nil or mongorover_environment then
-	MongoCollection = require("mongorover.MongoCollection")
-else
-	MongoCollection = require("MongoCollection")
+local importPrepend = ""
+if not _G["__MONGOROVER_TEST_ENVIRONMENT"] then
+	importPrepend = "mongorover."
 end
+
+local MongoCollection = require(importPrepend .. "MongoCollection")
 
 --- Database level operations.
 -- @module mongorover.MongoDatabase
