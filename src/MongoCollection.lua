@@ -63,12 +63,11 @@ MongoCollection.__index = MongoCollection
 	-- @local
 	-- @tparam MongoCollection collection Needs to instantiate with a reference to the collection to ensure the collection is
 	-- not garbage collected before the cursor.
-	-- @tparam MongoCursor mongoCursor A cursor from the C wrapper.
-	function createCursorIterator (collection, mongoCursor)
-		local cursor_t = mongoCursor
+	-- @tparam MongoCursor mongo_cursor A cursor from the C wrapper.
+	function createCursorIterator (collection, mongo_cursor)
 		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
 		-- Table has to have relevant information in it, to prevent garbage collection.
-		local mongoCursorPointer = {collection=collection, cursor_t=mongoCursor}
+		local mongoCursorPointer = {collection=collection, cursor_t=mongo_cursor}
 		setmetatable(mongoCursorPointer, {__mode = "k"})
 		
 		return function ()
@@ -86,7 +85,7 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:find(query, fields)
 		query = query or {}
 		fields = fields or {}
-		local cursor_t = self.collection_t:collection_find(self, query, fields)
+		local cursor_t = self.collection_t:collection_find(query, fields)
 		return createCursorIterator(self, cursor_t)
 	end
 	

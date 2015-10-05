@@ -37,23 +37,23 @@ generate_ObjectID(lua_State *L,
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
                  "ObjectId not a global variable",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
-    lua_getfield( L, -1, "new");
+    lua_getfield(L, -1, "new");
     lua_pushstring(L, str);
 
     // Make call using 1 argument and getting 1 result
     if (lua_pcall(L, 1, 1, 0) != 0) {
         strncpy (error->message,
                  lua_tostring(L, -1),
-                 sizeof (error->message));
+                 sizeof(error->message));
         lua_pop(L, 1);
         return false;
     }
     // Remove global variable ObjectID off of the stack to maintain stack integrity
-    lua_remove (L, -2);
+    lua_remove(L, -2);
 
     return true;
 }
@@ -104,12 +104,13 @@ void
 generate_BSONNull(lua_State *L)
 {
     lua_getglobal(L, "BSONNull");
-    lua_getfield( L, -1, "new");
+    lua_getfield(L, -1, "new");
     // Make call using 0 arguments and getting 1 result
-    if (lua_pcall(L, 0, 1, 0) != 0)
+    if (lua_pcall(L, 0, 1, 0) != 0) {
         luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
+    }
     // Remove global variable BSONNull off of the stack to maintain stack integrity
-    lua_remove (L, -2);
+    lua_remove(L, -2);
 }
 
 
@@ -118,12 +119,11 @@ is_BSONNull(lua_State *L,
             int index)
 {
     //TODO: make this error based
-
     bool ret;
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
 
     lua_getglobal(L, "BSONNull");
-    lua_getfield( L, -1, "isBSONNull");
+    lua_getfield(L, -1, "isBSONNull");
     lua_pushvalue(L, absolute_stack_index);
     if (lua_pcall(L, 1, 1, 0) != 0) {
         luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
@@ -152,7 +152,8 @@ bool
 generate_InsertOneResult(lua_State *L,
                          bool acknowledged,
                          int index,
-                         bson_error_t *error) {
+                         bson_error_t *error)
+{
 
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
 
@@ -160,15 +161,15 @@ generate_InsertOneResult(lua_State *L,
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
                  "InsertOneResult not a global variable",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
-    lua_getfield( L, -1, "new");
+    lua_getfield(L, -1, "new");
     if (!lua_isfunction(L, -1)) {
         strncpy (error->message,
                  "InsertOneResult does not have method 'new'",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
@@ -180,7 +181,7 @@ generate_InsertOneResult(lua_State *L,
     if (lua_pcall(L, 2, 1, 0) != 0) {
         strncpy (error->message,
                  lua_tostring(L, -1),
-                 sizeof (error->message));
+                 sizeof(error->message));
         lua_pop(L, 1);
         return false;
     }
@@ -221,14 +222,14 @@ generate_InsertManyResult(lua_State *L,
     lua_getglobal(L, "InsertManyResult");
     if (!lua_istable(L, -1)) {
         strncpy (error->message, "InsertManyResult not a global variable",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
-    lua_getfield( L, -1, "new");
+    lua_getfield(L, -1, "new");
     if (!lua_isfunction(L, -1)) {
         strncpy (error->message, "InsertManyResult does not have method 'new'",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
@@ -242,7 +243,7 @@ generate_InsertManyResult(lua_State *L,
     // Place array of inserted _ids onto the top of the stack.
     lua_newtable(L);
 
-    for (i=0, lua_index=1; i < num_elements; i++, lua_index++) {
+    for (i = 0, lua_index = 1; i < num_elements; i++, lua_index++) {
         lua_rawgeti(L, absolute_stack_index, lua_index);
         lua_pushstring(L, "_id");
         lua_gettable(L, -2);
@@ -258,13 +259,13 @@ generate_InsertManyResult(lua_State *L,
     if (lua_pcall(L, 2, 1, 0) != 0) {
         strncpy (error->message,
                  lua_tostring(L, -1),
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
     // Remove global variable InsertManyResult off of the stack to maintain
     // stack integrity
-    lua_remove (L, -2);
+    lua_remove(L, -2);
 
     return true;
 }
@@ -273,20 +274,21 @@ bool
 generate_DeleteResult(lua_State *L,
                       bson_t *raw_result,
                       bool acknowledged,
-                      bson_error_t *error) {
+                      bson_error_t *error)
+{
     lua_getglobal(L, "DeleteResult");
     if (!lua_istable(L, -1)) {
         strncpy (error->message,
                  "DeleteResult not a global variable",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
-    lua_getfield( L, -1, "new");
+    lua_getfield(L, -1, "new");
     if (!lua_isfunction(L, -1)) {
         strncpy (error->message,
                  "DeleteResult does not have method 'new'",
-                 sizeof (error->message));
+                 sizeof(error->message));
         return false;
     }
 
@@ -302,7 +304,7 @@ generate_DeleteResult(lua_State *L,
     if (lua_pcall(L, 2, 1, 0) != 0) {
         strncpy (error->message,
                  lua_tostring(L, -1),
-                 sizeof (error->message));
+                 sizeof(error->message));
         lua_pop(L, 1);
         return false;
     }

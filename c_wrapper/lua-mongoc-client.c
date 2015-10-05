@@ -21,16 +21,16 @@ int lua_mongo_client_new(lua_State *L)
     client_t *client;
     const char *db_uri;
 
-    mongoc_init ();
+    mongoc_init();
 
-    client = (client_t *)lua_newuserdata(L, sizeof(*client));
+    client = (client_t *) lua_newuserdata(L, sizeof(*client));
 
     db_uri = luaL_checkstring(L, 1);
     if (db_uri == NULL) {
         luaL_error(L, "database uri cannot be empty");
     }
 
-    client->c_client = mongoc_client_new (db_uri);
+    client->c_client = mongoc_client_new(db_uri);
 
     // Add the metatable to the stack.
     luaL_getmetatable(L, "lua_mongoc_client");
@@ -42,13 +42,13 @@ int lua_mongo_client_new(lua_State *L)
 int
 lua_mongo_client_get_database_names(lua_State *L)
 {
-    char** database_names;
+    char **database_names;
     bson_error_t error;
     client_t *client;
     int num_databases;
     int i;
 
-    client = (client_t *)luaL_checkudata(L, 1, "lua_mongoc_client");
+    client = (client_t *) luaL_checkudata(L, 1, "lua_mongoc_client");
 
     database_names = mongoc_client_get_database_names(client->c_client, &error);
     if (database_names) {
@@ -60,7 +60,7 @@ lua_mongo_client_get_database_names(lua_State *L)
             lua_pushstring(L, database_names[i]);
             lua_settable(L, -3);
         }
-        bson_strfreev (database_names);
+        bson_strfreev(database_names);
     } else {
         luaL_error(L, error.message);
     }
@@ -73,7 +73,7 @@ lua_mongo_client_destroy(lua_State *L)
 {
     client_t *client;
 
-    client = (client_t *)luaL_checkudata(L, 1, "lua_mongoc_client");
+    client = (client_t *) luaL_checkudata(L, 1, "lua_mongoc_client");
     if (client->c_client != NULL) {
         mongoc_client_destroy(client->c_client);
         client->c_client = NULL;
