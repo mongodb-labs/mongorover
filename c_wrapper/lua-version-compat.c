@@ -20,7 +20,8 @@
 void
 setfuncs_compat(lua_State *L,
                 const struct luaL_Reg *R,
-                char *name_for_lua51) {
+                char *name_for_lua51)
+{
 
 #if LUA_VERSION_NUM >= 502
     luaL_setfuncs(L, R, 0);
@@ -33,7 +34,8 @@ setfuncs_compat(lua_State *L,
 void
 newlib_compat(lua_State *L,
               const struct luaL_Reg *R,
-              char *name_for_lua51) {
+              char *name_for_lua51)
+{
 
 #if LUA_VERSION_NUM >= 502
     luaL_newlib(L, R);

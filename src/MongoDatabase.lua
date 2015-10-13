@@ -73,8 +73,8 @@ MongoDatabase.__index = MongoDatabase
 	-- Returns boolean whether the collection is present in the database.
 	-- @tparam string collectionName The name of the database.
 	-- @treturn boolean A boolean value whether the database has the collection.
-	function MongoDatabase:hasCollection(collectionName)
-		ret = self.database_t:has_collection(collectionName)
+	function MongoDatabase:hasCollection(collection_name)
+		ret = self.database_t:has_collection(collection_name)
 		return ret
 	end
 	
