@@ -22,11 +22,20 @@ limitations under the License.
 --- Lua driver for MongoDB.
 -- @type mongorover
 
-local MongoClient = require('mongorover.MongoClient')
-local MongoDatabase = require('mongorover.MongoDatabase')
-local MongoCollection = require('mongorover.MongoCollection')
-local luaBSONObjects = require('mongorover.luaBSONObjects')
-local resultObjects = require('mongorover.resultObjects')
+local importPrepend = ""
+if not _G["__MONGOROVER_TEST_ENVIRONMENT"] then
+	-- import from installed luarock
+	importPrepend = "mongorover."
+else
+	-- import local
+	importPrepend = "src."
+end
+
+local MongoClient = require(importPrepend .. 'MongoClient')
+local MongoDatabase = require(importPrepend .. 'MongoDatabase')
+local MongoCollection = require(importPrepend .. 'MongoCollection')
+local luaBSONObjects = require(importPrepend .. 'luaBSONObjects')
+local resultObjects = require(importPrepend .. 'resultObjects')
 
 local objects = {_VERSION = "0.0.1",
 	MongoClient = MongoClient,
