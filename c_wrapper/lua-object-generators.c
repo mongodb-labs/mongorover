@@ -17,9 +17,10 @@
 #include "lua-object-generators.h"
 
 /**
- * generate_ObjectID
+ * generate_ObjectID:
  * @L: A lua_State.
  * @str: A char*.
+ * @absolute_luaBSONObjects_index: An Int.
  * @error: A bson_error_t.
  *
  * Generates ObjectID with string given in str and leaves it on top of the
@@ -48,7 +49,7 @@ generate_ObjectID(lua_State *L,
         lua_pop(L, 1);
         return false;
     }
-    // Remove global variable ObjectID off of the stack to maintain stack integrity
+    // Remove variable ObjectID off of the stack to maintain stack integrity
     lua_remove(L, -2);
 
     return true;
@@ -56,13 +57,13 @@ generate_ObjectID(lua_State *L,
 
 
 /**
- * isObjectId
+ * is_ObjectId:
  * @L: A lua_State.
  * @index: Location of object on stack.
  * @error: A bson_error_t.
  *
- * Takes global variable isObjectId and uses it to call
- * isObjectId.isObjectId(...) on the object at the given index on the stack.
+ * Takes variable ObjectId and uses it to call ObjectId.isObjectId(...)
+ * on the object at the given index on the stack.
  *
  * Returns false if error occurred. Error propagated through the bson_error_t.
  */
@@ -96,23 +97,49 @@ is_ObjectId(lua_State *L,
     return ret;
 }
 
-
-void
+/**
+ * generate_BSONNull:
+ * @L: A lua_State.
+ * @absolute_luaBSONObjects_index: An Int.
+ * @error: A bson_error_t.
+ *
+ * Generates BSONNull and leaves it on top of the stack.
+ *
+ * Returns false if error occurred. Error propagated through the bson_error_t.
+ */
+bool
 generate_BSONNull(lua_State *L,
-                  int absolute_luaBSONObjects_index)
+                  int absolute_luaBSONObjects_index,
+                  bson_error_t *error)
 {
 
     lua_getfield(L, absolute_luaBSONObjects_index, "BSONNull");
     lua_getfield(L, -1, "new");
     // Make call using 0 arguments and getting 1 result
     if (lua_pcall(L, 0, 1, 0) != 0) {
-        luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
+        strncpy (error->message,
+                 lua_tostring(L, -1),
+                 sizeof(error->message));
+        lua_pop(L, 1);
+        return false;
     }
-    // Remove global variable BSONNull off of the stack to maintain stack integrity
+    // Remove variable BSONNull off of the stack to maintain stack integrity
     lua_remove(L, -2);
+    return true;
 }
 
 
+/**
+ * is_BSONNull:
+ * @L: A lua_State.
+ * @index: Location of object on stack.
+ * @error: A bson_error_t.
+ *
+ * Takes variable isObjectId and uses it to call BSONNull.isBSONNull(...)
+ * on the object at the given index on the stack.
+ *
+ * Returns false if error occurred. Error propagated through the bson_error_t.
+ */
 bool
 is_BSONNull(lua_State *L,
             int index,

@@ -29,8 +29,9 @@ bool is_ObjectId(lua_State *L,
                  int index,
                  int absolute_luaBSONObjects_index);
 
-void generate_BSONNull(lua_State *L,
-                       int absolute_luaBSONObjects_index);
+bool generate_BSONNull(lua_State *L,
+                       int absolute_luaBSONObjects_index,
+                       bson_error_t *error);
 
 bool is_BSONNull(lua_State *L,
                  int index,

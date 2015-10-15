@@ -661,7 +661,9 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
                 break;
             case BSON_TYPE_NULL: {
-                generate_BSONNull(L, absolute_luaBSONObjects_index);
+                if (!(generate_BSONNull(L, absolute_luaBSONObjects_index, error))) {
+                    return false;
+                }
                 lua_setfield(L, absolute_stack_index, key);
                 break;
             };
