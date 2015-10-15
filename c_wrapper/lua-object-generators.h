@@ -22,15 +22,19 @@
 
 bool generate_ObjectID(lua_State *L,
                        char *str,
+                       int absolute_luaBSONObjects_index,
                        bson_error_t *error);
 
 bool is_ObjectId(lua_State *L,
-                 int index);
+                 int index,
+                 int absolute_luaBSONObjects_index);
 
-void generate_BSONNull(lua_State *L);
+void generate_BSONNull(lua_State *L,
+                       int absolute_luaBSONObjects_index);
 
 bool is_BSONNull(lua_State *L,
-                 int index);
+                 int index,
+                 int absolute_luaBSONObjects_index);
 
 bool generate_InsertOneResult(lua_State *L,
                               bool acknowledged,
@@ -41,11 +45,13 @@ bool generate_InsertManyResult(lua_State *L,
                                bson_t *raw_result,
                                int index,
                                int num_elements,
+                               int absolute_luaBSONObjects_index,
                                bson_error_t *error);
 
 bool generate_DeleteResult(lua_State *L,
                            bson_t *raw_result,
                            bool acknowledged,
+                           int absolute_luaBSONObjects_index,
                            bson_error_t *error);
 
 #endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H

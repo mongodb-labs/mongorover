@@ -15,7 +15,6 @@
  */
 #include "lua-mongo-cursor.h"
 
-
 /**
  * lua_mongo_cursor_new
  * @L: A lua_State.
@@ -49,10 +48,12 @@ lua_mongo_cursor_iterate(lua_State *L)
     bson_error_t error;
     bool throw_error = false;
 
+    int absolute_luaBSONObjects_index = 2;
+
     cursor = (lua_mongo_cursor_t *) luaL_checkudata(L, 1, "lua_mongo_cursor");
 
     if (mongoc_cursor_next(cursor->c_cursor, &doc)) {
-        throw_error = !(bson_document_or_array_to_table(L, doc, true, &error));
+        throw_error = !(bson_document_or_array_to_table(L, doc, true, absolute_luaBSONObjects_index, &error));
         bson_destroy(doc);
 
         if (throw_error) {

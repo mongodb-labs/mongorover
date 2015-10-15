@@ -26,33 +26,37 @@ bool lua_table_is_array(lua_State *L, int index);
 bool find_and_set_or_create_id(lua_State *L,
                                int index,
                                bson_t *bson_doc,
+                               int absolute_luaBSONObjects_index,
                                bson_error_t *error);
 
 bool lua_table_to_bson(lua_State *L,
                        bson_t *bson_doc,
                        int index,
                        bool _id_required,
+                       int absolute_luaBSONObjects_index,
                        bson_error_t *error);
 
 bool add_lua_table_contents_to_bson_doc(lua_State *L,
                                         bson_t *bson_doc,
                                         int index,
                                         bool _id_required,
+                                        int absolute_luaBSONObjects_index,
                                         bson_error_t *error);
 
 int lua_array_length(lua_State *L, int index);
 
 bool append_stack_value_to_bson_doc(lua_State *L,
-                        bson_t *bson_doc,
-                        const char *key,
-                        int index,
-                        bson_error_t *error);
+                                    bson_t *bson_doc,
+                                    const char *key,
+                                    int index,
+                                    int absolute_luaBSONObjects_index,
+                                    bson_error_t *error);
 
 bool bson_document_or_array_to_table(lua_State *L,
                                      bson_t *bson_doc,
                                      bool is_table,
+                                     int absolute_luaBSONObjects_index,
                                      bson_error_t *error);
-
 
 
 #endif //MONGO_LUA_DRIVER_LUA_BSON_H

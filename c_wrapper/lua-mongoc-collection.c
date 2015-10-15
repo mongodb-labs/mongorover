@@ -29,7 +29,7 @@ lua_mongo_collection_new(lua_State *L)
 
     database = (database_t *) luaL_checkudata(L, 1, "lua_mongoc_database");
 
-    collection_name = luaL_checkstring (L, collection_name_index);
+    collection_name = luaL_checkstring(L, 2);
     if (collection_name == NULL) {
         luaL_error(L, "collection name cannot be empty");
     }
@@ -84,15 +84,15 @@ lua_mongo_collection_count(lua_State *L)
     bson_error_t error;
     bool throw_error = false;
 
-    int query_index = 2;
-    int skip_index = 3;
-    int limit_index = 4;
-
+    int absolute_luaBSONObjects_index = 2;
+    int query_index = 3;
+    int skip_index = 4;
+    int limit_index = 5;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_isnil(L, query_index))) {
-        throw_error = !(lua_table_to_bson(L, &query, query_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &query, query_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -142,20 +142,21 @@ lua_mongo_collection_find(lua_State *L)
     bool throw_error = false;
     bson_error_t error;
 
-    int query_index = 2;
-    int fields_index = 3;
+    int absolute_luaBSONObjects_index = 2;
+    int query_index = 3;
+    int fields_index = 4;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_isnil(L, query_index))) {
-        throw_error = !(lua_table_to_bson(L, &query, query_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &query, query_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
     }
 
     if (!(lua_isnil(L, fields_index))) {
-        throw_error = !(lua_table_to_bson(L, &fields, fields_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &fields, fields_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -190,20 +191,21 @@ lua_mongo_collection_find_one(lua_State *L)
     bool throw_error = false;
     bson_error_t error;
 
-    int query_index = 2;
-    int fields_index = 3;
+    int absolute_luaBSONObjects_index = 2;
+    int query_index = 3;
+    int fields_index = 4;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_isnil(L, query_index))) {
-        throw_error = !(lua_table_to_bson(L, &query, query_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &query, query_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
     }
 
     if (!(lua_isnil(L, fields_index))) {
-        throw_error = !(lua_table_to_bson(L, &fields, fields_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &fields, fields_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -223,7 +225,7 @@ lua_mongo_collection_find_one(lua_State *L)
         }
     } else {
         num_ret_vals = 1;
-        throw_error = !(bson_document_or_array_to_table(L, doc, true, &error));
+        throw_error = !(bson_document_or_array_to_table(L, doc, true, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -259,15 +261,16 @@ lua_mongo_collection_update(lua_State *L)
     bson_t reply = BSON_INITIALIZER;
     bool throw_error = false;
 
-    int filter_index = 2;
-    int update_index = 3;
-    int upsert_index = 4;
-    int update_many_index = 5;
+    int absolute_luaBSONObjects_index = 2;
+    int filter_index = 3;
+    int update_index = 4;
+    int upsert_index = 5;
+    int update_many_index = 6;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_isnil(L, filter_index))) {
-        throw_error = !(lua_table_to_bson(L, &filter, filter_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &filter, filter_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -276,7 +279,7 @@ lua_mongo_collection_update(lua_State *L)
     if (lua_isnil(L, update_index)) {
         luaL_error(L, "update parameters must be included");
     } else {
-        throw_error = !(lua_table_to_bson(L, &update, update_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &update, update_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -311,7 +314,7 @@ lua_mongo_collection_update(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(bson_document_or_array_to_table(L, &reply, true, &error));
+    throw_error = !(bson_document_or_array_to_table(L, &reply, true, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
@@ -342,14 +345,15 @@ lua_mongo_collection_insert_one(lua_State *L)
     bool ret;
     bool throw_error = false;
 
-    int document_index = 2;
+    int absolute_luaBSONObjects_index = 2;
+    int document_index = 3;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_istable(L, document_index))) {
         luaL_error(L, "second input must be a table");
     } else {
-        throw_error = !(lua_table_to_bson(L, &bson_doc, document_index, true, &error));
+        throw_error = !(lua_table_to_bson(L, &bson_doc, document_index, true, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -398,8 +402,10 @@ lua_mongo_collection_insert_many(lua_State *L)
     bool ret;
     bool throw_error = false;
 
-    int documents_index = 2;
-    int ordered_index = 3;
+    int absolute_luaBSONObjects_index = 2;
+    int documents_index = 3;
+    int ordered_index = 4;
+
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if (!(lua_istable(L, documents_index))) {
@@ -430,7 +436,7 @@ lua_mongo_collection_insert_many(lua_State *L)
             goto DONE;
         }
 
-        throw_error = !(lua_table_to_bson(L, &bson_doc, -1, true, &error));
+        throw_error = !(lua_table_to_bson(L, &bson_doc, -1, true, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -444,7 +450,8 @@ lua_mongo_collection_insert_many(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_InsertManyResult(L, &reply, documents_index, num_elements, &error));
+    throw_error = !(generate_InsertManyResult(L, &reply, documents_index, num_elements,
+                                              absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
@@ -473,7 +480,8 @@ int lua_mongo_collection_aggregate(lua_State *L)
     bson_error_t error;
     bool throw_error = false;
 
-    int aggregation_pipeline_index = 2;
+    int absolute_luaBSONObjects_index = 2;
+    int aggregation_pipeline_index = 3;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
@@ -485,7 +493,8 @@ int lua_mongo_collection_aggregate(lua_State *L)
         bson_append_array_begin(&aggregation_pipeline, "pipeline", -1,
                                 &inner_aggregation_pipeline);
 
-        throw_error = !(lua_table_to_bson(L, &inner_aggregation_pipeline, aggregation_pipeline_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &inner_aggregation_pipeline, aggregation_pipeline_index,
+                                          false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -525,12 +534,13 @@ lua_mongo_collection_delete_one(lua_State *L)
     bool throw_error = false;
     bool ret;
 
-    int selector_index = 2;
+    int absolute_luaBSONObjects_index = 2;
+    int selector_index = 3;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if ((lua_istable(L, selector_index))) {
-        throw_error = !(lua_table_to_bson(L, &selector, selector_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &selector, selector_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -549,7 +559,7 @@ lua_mongo_collection_delete_one(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_DeleteResult(L, &reply, ret, &error));
+    throw_error = !(generate_DeleteResult(L, &reply, ret, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
@@ -578,12 +588,13 @@ lua_mongo_collection_delete_many(lua_State *L)
     bool throw_error = false;
     bool ret;
 
-    int selector_index = 2;
+    int absolute_luaBSONObjects_index = 2;
+    int selector_index = 3;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     if ((lua_istable(L, selector_index))) {
-        throw_error = !(lua_table_to_bson(L, &selector, selector_index, false, &error));
+        throw_error = !(lua_table_to_bson(L, &selector, selector_index, false, absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -602,7 +613,7 @@ lua_mongo_collection_delete_many(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_DeleteResult(L, &reply, ret, &error));
+    throw_error = !(generate_DeleteResult(L, &reply, ret, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
