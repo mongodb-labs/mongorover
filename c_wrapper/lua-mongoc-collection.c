@@ -29,7 +29,7 @@ lua_mongo_collection_new(lua_State *L)
 
     database = (database_t *) luaL_checkudata(L, 1, "lua_mongoc_database");
 
-    collection_name = luaL_checkstring(L, 2);
+    collection_name = luaL_checkstring(L, collection_name_index);
     if (collection_name == NULL) {
         luaL_error(L, "collection name cannot be empty");
     }
