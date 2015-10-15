@@ -29,6 +29,8 @@ else
 	importPrepend = "mongorover."
 end
 local MongoClient = require(importPrepend .. "MongoClient")
+local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
+local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
 
 TestClient = {}
 

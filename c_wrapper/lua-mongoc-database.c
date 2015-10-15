@@ -124,9 +124,10 @@ lua_mongo_database_command_simple(lua_State *L)
     bson_error_t error;
     bool throw_error = false;
 
-    int command_name_index = 2;
-    int value_index = 3;
-    int options_index = 4;
+    int absolute_luaBSONObjects_index = 2;
+    int command_name_index = 3;
+    int value_index = 4;
+    int options_index = 5;
 
     database = (database_t *) luaL_checkudata(L, 1, "lua_mongoc_database");
 
@@ -137,13 +138,15 @@ lua_mongo_database_command_simple(lua_State *L)
 
     // If user does not put in value, it defaults to 1. Assume this will
     // always be a value to append to the bson document.
-    throw_error = !(append_stack_value_to_bson_doc(L, &command, command_name, value_index, &error));
+    throw_error = !(append_stack_value_to_bson_doc(L, &command, command_name, value_index,
+                                                   absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
 
     if (lua_istable(L, options_index)) {
-        throw_error = !(add_lua_table_contents_to_bson_doc(L, &command, options_index, false, &error));
+        throw_error = !(add_lua_table_contents_to_bson_doc(L, &command, options_index, false,
+                                                           absolute_luaBSONObjects_index, &error));
         if (throw_error) {
             goto DONE;
         }
@@ -163,7 +166,7 @@ lua_mongo_database_command_simple(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(bson_document_or_array_to_table(L, &reply, true, &error));
+    throw_error = !(bson_document_or_array_to_table(L, &reply, true, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }

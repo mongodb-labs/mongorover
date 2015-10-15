@@ -26,8 +26,8 @@ end
 
 MongoModule = require("mongo_module")
 local MongoDatabase = require(importPrepend .. "MongoDatabase")
-ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
-BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
+local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
+local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
 InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
 InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
 UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")

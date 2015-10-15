@@ -20,6 +20,9 @@ local importPrepend = ""
 if not _G["__MONGOROVER_TEST_ENVIRONMENT"] then
 	importPrepend = "mongorover."
 end
+local luaBSONObjects = require(importPrepend .. "luaBSONObjects")
+local MongoCollection = require(importPrepend .. "MongoCollection")
+
 
 local MongoCollection = require(importPrepend .. "MongoCollection")
 
@@ -87,7 +90,7 @@ MongoDatabase.__index = MongoDatabase
 	function MongoDatabase:command(command, value, options)
 		value = value or 1
 		code_options = code_options or nil
-		return self.database_t:command_simple(command, value, options)
+		return self.database_t:command_simple(luaBSONObjects, command, value, options)
 	end
 
 return MongoDatabase

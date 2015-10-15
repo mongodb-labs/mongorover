@@ -31,16 +31,12 @@
 bool
 generate_ObjectID(lua_State *L,
                   char *str,
+                  int absolute_luaBSONObjects_index,
                   bson_error_t *error)
 {
-    lua_getglobal(L, "ObjectId");
-    if (!lua_istable(L, -1)) {
-        strncpy (error->message,
-                 "ObjectId not a global variable",
-                 sizeof(error->message));
-        return false;
-    }
 
+    lua_pushstring(L, "ObjectId");
+    lua_gettable(L, absolute_luaBSONObjects_index);
     lua_getfield(L, -1, "new");
     lua_pushstring(L, str);
 
@@ -73,13 +69,14 @@ generate_ObjectID(lua_State *L,
 
 bool
 is_ObjectId(lua_State *L,
-            int index)
+            int index,
+            int absolute_luaBSONObjects_index)
 {
     //TODO: make this error based
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
     bool ret;
 
-    lua_getglobal(L, "ObjectId");
+    lua_getfield(L, absolute_luaBSONObjects_index, "ObjectId");
     lua_getfield(L, -1, "isObjectId");
 
     // Push value that we want to check if it is an ObjectId to top of stack.
@@ -101,9 +98,11 @@ is_ObjectId(lua_State *L,
 
 
 void
-generate_BSONNull(lua_State *L)
+generate_BSONNull(lua_State *L,
+                  int absolute_luaBSONObjects_index)
 {
-    lua_getglobal(L, "BSONNull");
+
+    lua_getfield(L, absolute_luaBSONObjects_index, "BSONNull");
     lua_getfield(L, -1, "new");
     // Make call using 0 arguments and getting 1 result
     if (lua_pcall(L, 0, 1, 0) != 0) {
@@ -116,13 +115,14 @@ generate_BSONNull(lua_State *L)
 
 bool
 is_BSONNull(lua_State *L,
-            int index)
+            int index,
+            int absolute_luaBSONObjects_index)
 {
     //TODO: make this error based
     bool ret;
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
 
-    lua_getglobal(L, "BSONNull");
+    lua_getfield(L, absolute_luaBSONObjects_index, "BSONNull");
     lua_getfield(L, -1, "isBSONNull");
     lua_pushvalue(L, absolute_stack_index);
     if (lua_pcall(L, 1, 1, 0) != 0) {
@@ -213,6 +213,7 @@ generate_InsertManyResult(lua_State *L,
                           bson_t *raw_result,
                           int index,
                           int num_elements,
+                          int absolute_luaBSONObjects_index,
                           bson_error_t *error)
 {
     int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
@@ -234,7 +235,7 @@ generate_InsertManyResult(lua_State *L,
     }
 
     // Place raw_result on top of the stack
-    if (!(bson_document_or_array_to_table(L, raw_result, true, error))) {
+    if (!(bson_document_or_array_to_table(L, raw_result, true, absolute_luaBSONObjects_index, error))) {
         //Maintain stack integrity.
         lua_pop(L, 2);
         return false;
@@ -274,6 +275,7 @@ bool
 generate_DeleteResult(lua_State *L,
                       bson_t *raw_result,
                       bool acknowledged,
+                      int absolute_luaBSONObjects_index,
                       bson_error_t *error)
 {
     lua_getglobal(L, "DeleteResult");
@@ -295,7 +297,7 @@ generate_DeleteResult(lua_State *L,
     lua_pushboolean(L, acknowledged);
 
     // Place raw_result on top of the stack
-    if (!(bson_document_or_array_to_table(L, raw_result, true, error))) {
+    if (!(bson_document_or_array_to_table(L, raw_result, true, absolute_luaBSONObjects_index, error))) {
         //Maintain stack integrity.
         lua_pop(L, 2);
         return false;
@@ -310,6 +312,5 @@ generate_DeleteResult(lua_State *L,
     }
 
     lua_remove(L, -2);
-
     return true;
 }
