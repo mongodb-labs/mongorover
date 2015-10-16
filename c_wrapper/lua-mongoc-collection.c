@@ -361,7 +361,6 @@ lua_mongo_collection_insert_one(lua_State *L)
 
     bulk_insert = mongoc_collection_create_bulk_operation(collection->c_collection,
                                                           true, NULL);
-
     mongoc_bulk_operation_insert(bulk_insert, &bson_doc);
     ret = mongoc_bulk_operation_execute(bulk_insert, &reply, &error);
 
@@ -370,13 +369,12 @@ lua_mongo_collection_insert_one(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_InsertOneResult(L, ret, document_index, &error));
-    if (throw_error) {
-        goto DONE;
-    }
+    //put return variables on top of stack to be returned
+    lua_pushboolean(L, ret);
+    lua_pushstring(L, "_id");
+    lua_gettable(L, document_index);
 
     DONE:
-
     bson_destroy(&bson_doc);
     bson_destroy(&reply);
 
@@ -388,7 +386,7 @@ lua_mongo_collection_insert_one(lua_State *L)
         luaL_error(L, error.message);
     }
 
-    return 1;
+    return 2;
 }
 
 int
@@ -399,8 +397,8 @@ lua_mongo_collection_insert_many(lua_State *L)
     bool ordered;
     bson_error_t error;
     bson_t reply = BSON_INITIALIZER;
-    bool ret;
     bool throw_error = false;
+    int i, num_elements, lua_index;
 
     int absolute_luaBSONObjects_index = 2;
     int documents_index = 3;
@@ -423,7 +421,6 @@ lua_mongo_collection_insert_many(lua_State *L)
 
     lua_pushnil(L);
 
-    int num_elements, lua_index;
     for (num_elements = 0, lua_index = 1;
          lua_next(L, documents_index) != 0;
          num_elements++, lua_index++) {
@@ -450,10 +447,29 @@ lua_mongo_collection_insert_many(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_InsertManyResult(L, &reply, documents_index, num_elements,
-                                              absolute_luaBSONObjects_index, &error));
+    // Place reply on top of the stack
+    throw_error = !(bson_document_or_array_to_table(L, &reply, true, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
+    }
+
+    // make array of inserted ids
+    lua_newtable(L);
+    for (i = 0, lua_index = 1; i < num_elements; i++, lua_index++) {
+        lua_rawgeti(L, documents_index, lua_index);
+        lua_pushstring(L, "_id");
+        lua_gettable(L, -2);
+
+        throw_error = lua_isnil(L, -1);
+        if (throw_error) {
+            strncpy(error.message,
+                    "_id was not generated for an insert many document",
+                    sizeof(error.message));
+            goto DONE;
+        }
+
+        lua_rawseti(L, -3, lua_index);
+        lua_pop(L, 1);
     }
 
     DONE:
@@ -467,7 +483,7 @@ lua_mongo_collection_insert_many(lua_State *L)
         luaL_error(L, error.message);
     }
 
-    return 1;
+    return 2;
 }
 
 
@@ -559,7 +575,9 @@ lua_mongo_collection_delete_one(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_DeleteResult(L, &reply, ret, absolute_luaBSONObjects_index, &error));
+    // place return variables on top of stack
+    lua_pushboolean(L, ret);
+    throw_error = !(bson_document_or_array_to_table(L, &reply, true, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
@@ -574,7 +592,7 @@ lua_mongo_collection_delete_one(lua_State *L)
         luaL_error(L, error.message);
     }
 
-    return 1;
+    return 2;
 }
 
 int
@@ -613,7 +631,9 @@ lua_mongo_collection_delete_many(lua_State *L)
         goto DONE;
     }
 
-    throw_error = !(generate_DeleteResult(L, &reply, ret, absolute_luaBSONObjects_index, &error));
+    // place return variables on top of stack
+    lua_pushboolean(L, ret);
+    throw_error = !(bson_document_or_array_to_table(L, &reply, true, absolute_luaBSONObjects_index, &error));
     if (throw_error) {
         goto DONE;
     }
@@ -628,7 +648,7 @@ lua_mongo_collection_delete_many(lua_State *L)
         luaL_error(L, error.message);
     }
 
-    return 1;
+    return 2;
 }
 
 int

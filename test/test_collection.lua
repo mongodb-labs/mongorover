@@ -31,6 +31,11 @@ end
 local MongoClient = require(importPrepend .. "MongoClient")
 local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
 local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
+local InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
+local InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
+local UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
+local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
+
 
 TestClient = {}
 

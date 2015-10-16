@@ -35,11 +35,11 @@ InsertOneResult.__index = InsertOneResult
 	---
 	-- Creates a InsertOneResult instance.
 	-- @tparam bool acknowledged Whether the insert was acknowledged or not.
-	-- @param _id The _id of the inserted document.
-	function InsertOneResult.new(acknowledged, _id)
+	-- @param inserted_id The _id of the inserted document.
+	function InsertOneResult.new(acknowledged, inserted_id)
 		local self = setmetatable({}, InsertOneResult)
 		self.acknowledged = acknowledged
-		self.inserted_id = _id
+		self.inserted_id = inserted_id
 		return self
 	end
 	
