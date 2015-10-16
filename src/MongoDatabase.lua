@@ -21,10 +21,9 @@ if not _G["__MONGOROVER_TEST_ENVIRONMENT"] then
 	importPrepend = "mongorover."
 end
 local luaBSONObjects = require(importPrepend .. "luaBSONObjects")
+local MongoModule = require("mongo_module")
 local MongoCollection = require(importPrepend .. "MongoCollection")
 
-
-local MongoCollection = require(importPrepend .. "MongoCollection")
 
 --- Database level operations.
 -- @module mongorover.MongoDatabase
@@ -61,8 +60,7 @@ MongoDatabase.__index = MongoDatabase
 	-- Returns array of collection names.
 	-- @treturn {string,...} An array containing the names of collections in the database.
 	function MongoDatabase:getCollectionNames()
-		collection_names = self.database_t:get_collection_names()
-		return collection_names
+		return self.database_t:get_collection_names()
 	end
 
 	---
@@ -76,9 +74,8 @@ MongoDatabase.__index = MongoDatabase
 	-- Returns boolean whether the collection is present in the database.
 	-- @tparam string collectionName The name of the database.
 	-- @treturn boolean A boolean value whether the database has the collection.
-	function MongoDatabase:hasCollection(collection_name)
-		ret = self.database_t:has_collection(collection_name)
-		return ret
+	function MongoDatabase:hasCollection(collectionName)
+		return self.database_t:has_collection(collectionName)
 	end
 	
 	---

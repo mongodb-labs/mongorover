@@ -24,14 +24,10 @@ else
 	importPrepend = "mongorover."
 end
 
-MongoModule = require("mongo_module")
+local MongoModule = require("mongo_module")
 local MongoDatabase = require(importPrepend .. "MongoDatabase")
 local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
 local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
-InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
-InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
-UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
-DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
 
 --- Tools for connecting to MongoDB.
 -- @module mongorover.MongoClient
@@ -58,8 +54,7 @@ MongoClient.__index = MongoClient
 	-- Returns array of database names.
 	-- @treturn {string,...} An array of database names.
 	function MongoClient:getDatabaseNames()
-		database_names = self.client_t:client_get_database_names()
-		return database_names
+		return self.client_t:client_get_database_names()
 	end
 
 	--- 

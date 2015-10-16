@@ -25,6 +25,10 @@ else
 end
 local MongoModule = require("mongo_module")
 local luaBSONObjects = require(importPrepend .. "luaBSONObjects")
+local InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
+local InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
+local UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
+local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
 
 --- Collection level utilities for Mongo.
 -- @module mongorover.MongoCollection
@@ -74,7 +78,7 @@ MongoCollection.__index = MongoCollection
 	-- @tparam MongoCollection collection Needs to instantiate with a reference to the collection to ensure the collection is
 	-- not garbage collected before the cursor.
 	-- @tparam MongoCursor mongo_cursor A cursor from the C wrapper.
-	function createCursorIterator (collection, mongo_cursor)
+	local function createCursorIterator (collection, mongo_cursor)
 		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
 		-- Table has to have relevant information in it, to prevent garbage collection.
 		local mongoCursorPointer = {collection=collection, cursor_t=mongo_cursor}
@@ -142,7 +146,8 @@ MongoCollection.__index = MongoCollection
 	-- one will be added automatically.
 	-- @return @{mongorover.resultObjects.InsertOneResult}
 	function MongoCollection:insert_one(document)
-		return self.collection_t:collection_insert_one(luaBSONObjects, document)
+		local acknowledged, inserted_id = self.collection_t:collection_insert_one(luaBSONObjects, document)
+		return InsertOneResult.new(acknowledged, inserted_id)
 	end
 	
 	---
@@ -155,7 +160,8 @@ MongoCollection.__index = MongoCollection
 	-- @return @{mongorover.resultObjects.InsertManyResult}
 	function MongoCollection:insert_many(documents, ordered)
 		ordered = ordered or true
-		return self.collection_t:collection_insert_many(luaBSONObjects, documents, ordered)
+		local raw_result, inserted_ids = self.collection_t:collection_insert_many(luaBSONObjects, documents, ordered)
+		return InsertManyResult.new(raw_result, inserted_ids)
 	end
 	
 	---
@@ -164,7 +170,8 @@ MongoCollection.__index = MongoCollection
 	-- @tparam table selector  Specifies criteria using query operators. 
 	-- @return @{mongorover.resultObjects.DeleteResult}
 	function MongoCollection:delete_one(selector)
-		return self.collection_t:collection_delete_one(luaBSONObjects, selector)
+		local acknowledged, raw_result = self.collection_t:collection_delete_one(luaBSONObjects, selector)
+		return DeleteResult.new(acknowledged, raw_result)
 	end
 	
 	---
@@ -173,7 +180,8 @@ MongoCollection.__index = MongoCollection
 	-- @tparam table selector  Specifies criteria using query operators. 
 	-- @return @{mongorover.resultObjects.DeleteResult}
 	function MongoCollection:delete_many(selector)
-		return self.collection_t:collection_delete_many(luaBSONObjects, selector)
+		local acknowledged, raw_result = self.collection_t:collection_delete_many(luaBSONObjects, selector)
+		return DeleteResult.new(acknowledged, raw_result)
 	end
 	
 	---
