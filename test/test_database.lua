@@ -31,6 +31,7 @@ local MongoClient = require(importPrepend .. "MongoClient")
 
 
 TestClient = {}
+
 	function TestClient:test_database_drop()
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
@@ -45,6 +46,27 @@ TestClient = {}
 		database:drop_database()
 		database_names = client:getDatabaseNames()
 		assert(not inArray("foo", database_names))
+	end
+	
+	function TestClient:test_database_index_into_collection()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("bar")
+		
+		collection:drop()
+		
+		local other_collection = database.bar
+		local count = other_collection:count()
+		assert(count == 0, "indexing from database to collection returned a count other than 0 for a dropped collection")
+		
+		local document_to_insert = {["test"] = "test_database_index_into_collection"}
+		
+		-- reinitialize collection because it got dropped
+		collection = database:getCollection("bar")
+		collection:insert_one(document_to_insert)
+		local document = other_collection:find_one()
+		
+		assert(table_eq(document_to_insert, document), "collection gotten from index is different than one gotten from database:getCollection(...)")
 	end
 	
 	function TestClient:test_get_collection_names()

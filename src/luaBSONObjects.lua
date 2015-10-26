@@ -13,15 +13,17 @@ end
 local BSONNull = require(importPrepend .. 'luaBSONObjects.BSONNull')
 local ObjectId = require(importPrepend .. 'luaBSONObjects.ObjectId')
 
-local objects = {BSONNull = BSONNull,
-	ObjectId = ObjectId}
+local objects = {
+	BSONNull = BSONNull,
+	ObjectId = ObjectId
+}
 
 local luaBSONObjects = setmetatable(objects, {
 	__index = objects,
+	__metatable = false,
 	__newindex = function(table, key, value)
 								error("resultObjects cannot be modified, it is a read-only table")
-							end,
-	__metatable = false
+							end
 })
 
 return luaBSONObjects

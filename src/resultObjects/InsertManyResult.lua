@@ -23,7 +23,6 @@ limitations under the License.
 --@type InsertManyResult
 
 local InsertManyResult = {}
-InsertManyResult.__index = InsertManyResult
 	
 	InsertManyResult.__tostringx = function (table_location)
 		InsertManyResult.__tostring = nil    
@@ -53,4 +52,13 @@ InsertManyResult.__index = InsertManyResult
 		
 	InsertManyResult.__tostring = InsertManyResult.__tostringx    
 
+local metatable = {
+	__index = InsertManyResult,
+	__call = function(table, ...)
+		-- table is the same as DeleteResult
+		return InsertManyResult.new(...)
+	end
+}
+
+setmetatable(InsertManyResult, metatable)
 return InsertManyResult
