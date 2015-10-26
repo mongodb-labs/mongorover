@@ -33,7 +33,6 @@ local MongoCollection = require(importPrepend .. "MongoCollection")
 -- @type mongorover.MongoDatabase
 
 local MongoDatabase = {__mode="k"}
-MongoDatabase.__index = MongoDatabase
 
 	---
 	-- Creates a new MongoDatabase instance. Called by MongoClient's getDatabase(...) method.
@@ -42,9 +41,19 @@ MongoDatabase.__index = MongoDatabase
 	-- @tparam string database_name
 	-- @return A @{MongoDatabase} instance.
 	function MongoDatabase.new(client, database_name)
-		local self = setmetatable({}, MongoDatabase)
-		self.database_t = MongoModule.database_new(client.client_t, database_name)
-		self.client = client
+		local self = {
+			database_t = MongoModule.database_new(client.client_t, database_name),
+			client = client
+		}
+		setmetatable(self, {
+				__index = function(table, key)
+					if rawget(MongoDatabase, key) then
+						return MongoDatabase[key]
+					else
+						return MongoCollection.new(table, key)
+					end
+				end
+			})
 		return self
 	end
 	
@@ -90,4 +99,13 @@ MongoDatabase.__index = MongoDatabase
 		return self.database_t:command_simple(luaBSONObjects, command, value, options)
 	end
 
+local metatable = {
+	__index = MongoDatabase,
+	__call = function(table, ...)
+					--table is the same as MongoDatabase
+					return MongoDatabase.new(...)
+				end
+}
+
+setmetatable(MongoDatabase, metatable)
 return MongoDatabase

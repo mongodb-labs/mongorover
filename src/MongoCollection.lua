@@ -36,8 +36,7 @@ local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
 --- Collection level utilities for Mongo.
 -- @type mongorover.MongoCollection
 local MongoCollection = {__mode="k"}
-MongoCollection.__index = MongoCollection
-
+	
 	---
 	-- Creates a new MongoCollection instance. Usually called by MongoDatabase's getCollection(...) method. 
 	-- @see MongoDatabase.getCollection
@@ -45,9 +44,14 @@ MongoCollection.__index = MongoCollection
 	-- @tparam string collection_name The name of the collection.
 	-- @return A @{MongoCollection} instance.
 	function MongoCollection.new(database, collection_name)
-		local self = setmetatable({}, MongoCollection)
-		self.database = database
-		self.collection_t = MongoModule.collection_new(database.database_t, collection_name)
+		local self = {
+			database = database,
+			collection_t = MongoModule.collection_new(database.database_t, collection_name)
+		}
+		
+		setmetatable(self, {
+			__index = MongoCollection
+		})
 		return self
 	end
 	
@@ -123,7 +127,7 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:update_one(filter, update, upsert)
 		upsert = upsert or false
 		local raw_result = self.collection_t:collection_update_one(luaBSONObjects, filter, update, upsert, false)
-		return UpdateResult.new(raw_result)
+		return UpdateResult(raw_result)
 	end
 	
 	---
@@ -136,7 +140,7 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:update_many(filter, update, upsert)
 		upsert = upsert or false
 		local raw_result = self.collection_t:collection_update_many(luaBSONObjects, filter, update, upsert, true)
-		return UpdateResult.new(raw_result)
+		return UpdateResult(raw_result)
 	end
 	
 	---
@@ -147,7 +151,7 @@ MongoCollection.__index = MongoCollection
 	-- @return @{mongorover.resultObjects.InsertOneResult}
 	function MongoCollection:insert_one(document)
 		local acknowledged, inserted_id = self.collection_t:collection_insert_one(luaBSONObjects, document)
-		return InsertOneResult.new(acknowledged, inserted_id)
+		return InsertOneResult(acknowledged, inserted_id)
 	end
 	
 	---
@@ -161,7 +165,7 @@ MongoCollection.__index = MongoCollection
 	function MongoCollection:insert_many(documents, ordered)
 		ordered = ordered or true
 		local raw_result, inserted_ids = self.collection_t:collection_insert_many(luaBSONObjects, documents, ordered)
-		return InsertManyResult.new(raw_result, inserted_ids)
+		return InsertManyResult(raw_result, inserted_ids)
 	end
 	
 	---
@@ -171,7 +175,7 @@ MongoCollection.__index = MongoCollection
 	-- @return @{mongorover.resultObjects.DeleteResult}
 	function MongoCollection:delete_one(selector)
 		local acknowledged, raw_result = self.collection_t:collection_delete_one(luaBSONObjects, selector)
-		return DeleteResult.new(acknowledged, raw_result)
+		return DeleteResult(acknowledged, raw_result)
 	end
 	
 	---
@@ -181,7 +185,7 @@ MongoCollection.__index = MongoCollection
 	-- @return @{mongorover.resultObjects.DeleteResult}
 	function MongoCollection:delete_many(selector)
 		local acknowledged, raw_result = self.collection_t:collection_delete_many(luaBSONObjects, selector)
-		return DeleteResult.new(acknowledged, raw_result)
+		return DeleteResult(acknowledged, raw_result)
 	end
 	
 	---
@@ -194,4 +198,13 @@ MongoCollection.__index = MongoCollection
 		return createCursorIterator(self, cursor_t)
 	end
 
+local metatable = {
+	__index = MongoCollection,
+	__call = function(table, ...) 
+					-- table is the same as MongoCollection
+					return MongoCollection.new(...)
+				end
+}
+
+setmetatable(MongoCollection, metatable)
 return MongoCollection

@@ -16,6 +16,7 @@ limitations under the License.
 
 --]]
 
+require('luaHelperFunctions')
 local LuaUnit = require("luaunit")
 
 dofile("setReleaseType.lua")
@@ -32,6 +33,47 @@ TestClient = {}
 	function TestClient:test_client_authenticate()
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		client:getDatabaseNames()
+	end
+	
+	function TestClient:test_client_call_metamethod()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+		
+		-- make sure collection "foo" exists
+		local database = client:getDatabase("foo")
+		local collection = database:getCollection("bar")
+		collection:insert_one({})
+		
+		local other_client = MongoClient("mongodb://user:password@localhost:27017/?authSource=admin")
+		local client_db_names = client:getDatabaseNames()
+		local other_client_db_names = other_client:getDatabaseNames()
+		
+		assert(table_eq(client_db_names, other_client_db_names), "__call metamethod not instantiating the same as MongoClient.new(...)")
+		
+		database:drop_database()
+		
+		client_db_names = client:getDatabaseNames()
+		other_client_db_names = other_client:getDatabaseNames()
+		assert(table_eq(client_db_names, other_client_db_names), "__call metamethod not instantiating the same as MongoClient.new(...)")
+	end
+	
+	function TestClient:test_client_index_into_database()
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
+
+		local database = client:getDatabase("foo")
+		database:drop_database()
+		
+		local other_database = client.foo
+		local has_database = other_database:hasCollection("bar")
+		-- just dropped the database, shouldn't exist
+		assert(has_database == false, "indexing from client to database doesn't work")
+		
+		-- reinitialize database since it got dropped
+		database = client:getDatabase("foo")
+		local collection = database:getCollection("bar")
+		collection:insert_one({})
+		
+		local has_collection = other_database:hasCollection("bar")
+		assert(has_collection == true, "indexing from client to database doesn't work")
 	end
 	
 	function TestClient:test_client_no_authentication()

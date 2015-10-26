@@ -23,7 +23,6 @@ limitations under the License.
 --@type DeleteResult
 
 local DeleteResult = {}
-DeleteResult.__index = DeleteResult
 	
 	DeleteResult.__tostringx = function (table_location)
 		DeleteResult.__tostring = nil    
@@ -55,4 +54,13 @@ DeleteResult.__index = DeleteResult
 		
 	DeleteResult.__tostring = DeleteResult.__tostringx    
 
+local metatable = {
+	__index = DeleteResult,
+	__call = function(table, ...)
+		-- table is the same as DeleteResult
+		return DeleteResult.new(...)
+	end
+}
+
+setmetatable(DeleteResult, metatable)
 return DeleteResult

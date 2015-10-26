@@ -37,7 +37,6 @@ local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
 -- @type mongorover.MongoClient
 
 local MongoClient = {}
-MongoClient.__index = MongoClient
 
 	---
 	-- Creates a MongoClient instance.
@@ -45,8 +44,23 @@ MongoClient.__index = MongoClient
 	-- @tparam string db_uri The MongoDB connection URI.
 	-- @return A @{MongoClient} instance.
 	function MongoClient.new(db_uri)
-		local self = setmetatable({}, MongoClient)
-		self.client_t = MongoModule.client_new(db_uri)
+		db_uri = db_uri or "mongodb://localhost:27017"
+		
+		local self = {
+			client_t = MongoModule.client_new(db_uri)
+		}
+		setmetatable(self, {
+			__index = function(table, key)
+				-- rawget(...) is the same as indexing into a table, however it does not invoke the metatable __index call if the key is not found
+				-- which would cause an infinite loop. This will emulate the same behavior as doing MongoClient.__index = MongoClient
+				-- but allows for us to get databases by indexing into the client
+				if rawget(MongoClient, key) then
+					return MongoClient[key]
+				else
+					return MongoClient.getDatabase(table, key)
+				end
+			end
+		})
 		return self
 	end
 	
@@ -66,4 +80,13 @@ MongoClient.__index = MongoClient
 		return MongoDatabase.new(self, database_name)
 	end
 
+local metatable = {
+	__index = MongoClient,
+	__call = function(table, ...)
+					--table is the same as MongoClient, so just use MongoClient
+					return MongoClient.new(...)
+				end
+}
+
+setmetatable(MongoClient, metatable)
 return MongoClient

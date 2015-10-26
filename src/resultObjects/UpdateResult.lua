@@ -23,7 +23,6 @@ limitations under the License.
 --@type UpdateResult
 
 local UpdateResult = {}
-UpdateResult.__index = UpdateResult
 	
 	UpdateResult.__tostringx = function (table_location)
 		UpdateResult.__tostring = nil    
@@ -37,7 +36,6 @@ UpdateResult.__index = UpdateResult
 	-- @tparam table raw_result The response from the server after an update converted to a Lua table.
 	function UpdateResult.new(raw_result)
 		local self = setmetatable({}, UpdateResult)
-		--'matched_count', 'modified_count', 'raw_result', 'upserted_id'
 		self.matched_count = raw_result.nMatched
 		self.modified_count = raw_result.nModified
 		self.raw_result = raw_result
@@ -57,4 +55,13 @@ UpdateResult.__index = UpdateResult
 	
 	UpdateResult.__tostring = UpdateResult.__tostringx    
 
+local metatable = {
+	__index = UpdateResult,
+	__call = function(table, ...)
+		-- table is the same as DeleteResult
+		return UpdateResult.new(...)
+	end
+}
+
+setmetatable(UpdateResult, metatable)
 return UpdateResult

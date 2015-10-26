@@ -23,7 +23,6 @@ limitations under the License.
 --@type InsertOneResult
 
 local InsertOneResult = {}
-InsertOneResult.__index = InsertOneResult
 	
 	InsertOneResult.__tostringx = function (table_location)
 		InsertOneResult.__tostring = nil    
@@ -53,4 +52,13 @@ InsertOneResult.__index = InsertOneResult
 		
 	InsertOneResult.__tostring = InsertOneResult.__tostringx    
 
+local metatable = {
+	__index = InsertOneResult,
+	__call = function(table, ...)
+		-- table is the same as DeleteResult
+		return InsertOneResult.new(...)
+	end
+}
+
+setmetatable(InsertOneResult, metatable)
 return InsertOneResult

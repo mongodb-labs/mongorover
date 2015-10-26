@@ -40,10 +40,10 @@ local objects = {InsertOneResult = InsertOneResult,
 
 local resultObjects = setmetatable({}, {
 	__index = objects,
+	__metatable = false,
 	__newindex = function(table, key, value)
 								error("resultObjects cannot be modified, it is a read-only table")
-							end,
-	__metatable = false
+							end
 })
 
 return resultObjects
