@@ -63,7 +63,12 @@ TestClient = {}
 		
 		collection:drop()
 		
-		local allDifferentTypes = {a = 1, b = 2, c = "C", d = "D", e = true, z = BSONNull.new(), _id = ObjectId.new("55830e73d2b38bf021417851")}
+		local allDifferentTypes = {
+									a = 1, b = 2, c = "C", d = "D", e = true,
+									f = {gh_issue_number = "34"}, g = {key1 = "foo", key2 = "bar"},
+									h = {1}, i = {1, 2},
+									z = BSONNull.new(), _id = ObjectId.new("55830e73d2b38bf021417851")
+								}
 		local result = collection:insert_one(allDifferentTypes)
 		assert(result.acknowledged == true, "insert_one failed")
 		assert(InsertOneResult.isInsertOneResult(result))
