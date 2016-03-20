@@ -478,10 +478,12 @@ bool
 bson_is_array(bson_iter_t iter)
 {
     int i;
+    char* end;
+    long ret;
     for (i = 0; bson_iter_next(&iter); i++) {
         const char *key = bson_iter_key(&iter);
-        long ret = strtol(key, NULL, 10);
-        if (ret != i) {
+        ret = strtol(key, &end, 10);
+        if (ret != i || *end) {
             return false;
         }
     }
