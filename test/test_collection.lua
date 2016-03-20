@@ -40,7 +40,7 @@ local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
 TestClient = {}
 
 	function TestClient:test_database_drop()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
 		
@@ -57,7 +57,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_find_one_and_insert_one_with_id()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
 		
@@ -73,7 +73,7 @@ TestClient = {}
 	end
 
 	function TestClient:test_find_one_and_insert_one_without_id()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
 		
@@ -89,7 +89,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_bad_key_in_document()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("bar")
 		
@@ -101,7 +101,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_insert_many()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
@@ -142,7 +142,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_find()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
@@ -182,7 +182,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_update_one()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
@@ -215,7 +215,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_update_many()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
@@ -247,7 +247,7 @@ TestClient = {}
 	end
 
 	function TestClient:test_count()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
@@ -267,7 +267,7 @@ TestClient = {}
 	end
 	
 	function TestClient:test_aggregate()
-		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
+		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource=admin")
 		local database = client:getDatabase("foo")
 		local collection = database:getCollection("test")
 		
