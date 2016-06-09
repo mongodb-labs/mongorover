@@ -16,8 +16,10 @@ limitations under the License.
 
 --]]
 
+EXPORT_ASSERT_TO_GLOBALS = true
+
 require('luaHelperFunctions')
-local LuaUnit = require("luaunit")
+require("luaunit")
 
 dofile("setReleaseType.lua")
 local importPrepend = ""
@@ -47,7 +49,7 @@ TestClient = {}
 		database_names = client:getDatabaseNames()
 		assert(not inArray("foo", database_names))
 	end
-	
+
 	function TestClient:test_database_index_into_collection()
 		local client = MongoClient.new("mongodb://user:password@localhost:27017/?authSource = admin")
 		local database = client:getDatabase("foo")
@@ -111,4 +113,5 @@ TestClient = {}
 		assert(inArray(2, values))		
 	end
 
-LuaUnit:run()
+lu = LuaUnit.new()
+lu:runSuite()
