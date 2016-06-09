@@ -16,8 +16,10 @@ limitations under the License.
 
 --]]
 
+EXPORT_ASSERT_TO_GLOBALS = true
+
 require('luaHelperFunctions')
-local LuaUnit = require("luaunit")
+require("luaunit")
 
 dofile("setReleaseType.lua")
 local importPrepend = ""
@@ -102,4 +104,5 @@ TestClient = {}
 		end
 	end
 
-LuaUnit:run()
+lu = LuaUnit.new()
+lu:runSuite()

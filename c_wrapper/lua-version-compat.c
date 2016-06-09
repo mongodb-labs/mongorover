@@ -17,6 +17,23 @@
 #include "lua-version-compat.h"
 #include "lua-mongoc-wrapper.h"
 
+
+/**
+ * lua versions <= 5.2 do not have integers (a subtype of number)
+ * if supported, push the integer onto the stack
+ * if not, push it as a number
+ */
+void
+lua_pushinteger_compat(lua_State *L,
+                       int value)
+{
+#if LUA_VERSION_NUM >= 503
+    lua_pushinteger(L, value);
+#else
+    lua_pushnumber(L, value);
+#endif
+}
+
 void
 setfuncs_compat(lua_State *L,
                 const struct luaL_Reg *R,

@@ -19,6 +19,8 @@
 
 #include "lua-mongoc-wrapper.h"
 
+void lua_pushinteger_compat(lua_State *L,
+                            int value);
 void setfuncs_compat(lua_State *L,
                      const struct luaL_Reg *R,
                      char *name_for_lua51);

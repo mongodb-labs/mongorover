@@ -32,7 +32,7 @@ package = "mongorover"
     maintainer = "Jesse Davis <jesse@mongodb.com>"
  }
  dependencies = {
-    "lua >= 5.1, < 5.3"
+    "lua >= 5.1"
  }
  external_dependencies = {
     LIBMONGOC = {

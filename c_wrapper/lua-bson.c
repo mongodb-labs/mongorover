@@ -15,6 +15,7 @@
  */
 
 #include "lua-bson.h"
+#include "lua-version-compat.h"
 
 int _convert_to_absolute_stack_index(lua_State *L,
                                      int index);
@@ -130,7 +131,16 @@ append_stack_value_to_bson_doc(lua_State *L,
         };
         case LUA_TNUMBER: {
             lua_Number double_value = lua_tonumber(L, absolute_stack_index);
+#if LUA_VERSION_NUM >= 503
+            if (double_value == (int)double_value) {
+                // unless specifically compiled for 32 bit, 64 bit is standard
+                bson_append_int64(bson_doc, key, -1, (int) double_value);
+            } else {
+                bson_append_double(bson_doc, key, -1, double_value);
+            }
+#else
             bson_append_double(bson_doc, key, -1, double_value);
+#endif
             break;
         };
         case LUA_TSTRING: {
@@ -229,7 +239,7 @@ find_and_set_or_create_id(lua_State *L,
 
     if (!(bson_empty(bson_doc))) {
         luaL_error(L, "bson document not empty. _id needs to be appended "
-                "first");
+            "first");
     }
 
     lua_pushstring(L, "_id");
@@ -282,8 +292,8 @@ lua_table_to_bson(lua_State *L,
     if (!(bson_empty(bson_doc))) {
         strncpy(error->message,
                 "bson_document passed to lua_table_to_bson is not empty. To "
-                        "append a table's contents to a bson document, use "
-                        "add_lua_table_contents_to_bson_doc",
+                    "append a table's contents to a bson document, use "
+                    "add_lua_table_contents_to_bson_doc",
                 sizeof(error->message));
         return false;
     }
@@ -330,7 +340,7 @@ add_lua_table_contents_to_bson_doc(lua_State *L,
     if (!(bson_validate(bson_doc, BSON_VALIDATE_NONE, &offset))) {
         strncpy(error->message,
                 "adding lua table to bson document caused malformed bson "
-                        "document",
+                    "document",
                 sizeof(error->message));
         return false;
     }
@@ -374,7 +384,7 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
 
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
     bool is_array;
-    int array_index;
+    int number_key;
 
     if (!lua_istable(L, absolute_stack_index)) {
         bson_snprintf(error->message, sizeof(error->message),
@@ -385,7 +395,7 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
     if (!(lua_checkstack(L, 3))) {
         strncpy(error->message,
                 "too many levels of embedded arrays, would cause stack "
-                        "overflow in C API",
+                    "overflow in C API",
                 sizeof(error->message));
 
         return false;
@@ -418,20 +428,17 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
                 if (!number_string_as_index) {
                     key = lua_tostring(L, -2);
                 } else {
-                    // Function tostring converts the value on the stack.
-                    // Need to make copy, convert it, then pop to allow lua_next
-                    // to iterate correctly.
-                    array_index = lua_tonumber(L, -2);
+                    number_key = lua_tonumber(L, -2);
 
                     // Lua indices start at 1, so decrement by one if it is
                     // an array.
                     if (is_array) {
-                        array_index--;
+                        number_key--;
                     }
 
-                    lua_pushnumber(L, array_index);
-                    key = lua_tostring(L, -1);
-                    lua_pop(L, 1);
+                    char buffer[100];
+                    sprintf(buffer, "%d", (int) number_key);
+                    key = buffer;
                 }
 
                 if (_id_required) {
@@ -443,7 +450,9 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
                     }
                 }
 
-                if (!(append_stack_value_to_bson_doc(L, bson_doc, key, -1, absolute_luaBSONObjects_index, error))) {
+                if (!(append_stack_value_to_bson_doc(L, bson_doc, key, -1,
+                                                     absolute_luaBSONObjects_index, error)))
+                {
                     lua_pop(L, 1);
                     return false;
                 }
@@ -478,7 +487,7 @@ bool
 bson_is_array(bson_iter_t iter)
 {
     int i;
-    char* end;
+    char *end;
     long ret;
     for (i = 0; bson_iter_next(&iter); i++) {
         const char *key = bson_iter_key(&iter);
@@ -685,12 +694,11 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 luaL_error(L, "BSON_TYPE_CODEWSCOPE not supported yet");
                 break;
             case BSON_TYPE_INT32: {
-                lua_Number val = value->value.v_int32;
+                lua_pushinteger_compat(L, value->value.v_int32);
+
                 if (is_table) {
-                    lua_pushnumber(L, val);
                     lua_setfield(L, absolute_stack_index, key);
                 } else {
-                    lua_pushnumber(L, val);
                     lua_rawseti(L, absolute_stack_index, i + 1);
                 }
                 break;
@@ -699,12 +707,11 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 luaL_error(L, "BSON_TYPE_TIMESTAMP not supported yet\n");
                 break;
             case BSON_TYPE_INT64: {
-                lua_Number val = value->value.v_int64;
+                lua_pushinteger_compat(L, value->value.v_int64);
+
                 if (is_table) {
-                    lua_pushnumber(L, val);
                     lua_setfield(L, absolute_stack_index, key);
                 } else {
-                    lua_pushnumber(L, val);
                     lua_rawseti(L, absolute_stack_index, i + 1);
                 }
                 break;

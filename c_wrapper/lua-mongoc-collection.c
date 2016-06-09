@@ -17,6 +17,7 @@
 #include "lua-mongoc-wrapper.h"
 #include "lua-bson.h"
 #include "lua-mongoc-collection.h"
+#include "lua-version-compat.h"
 
 int
 lua_mongo_collection_new(lua_State *L)
@@ -127,7 +128,7 @@ lua_mongo_collection_count(lua_State *L)
         luaL_error(L, error.message);
     }
 
-    lua_pushnumber(L, count);
+    lua_pushinteger_compat(L, count);
 
     return 1;
 }
