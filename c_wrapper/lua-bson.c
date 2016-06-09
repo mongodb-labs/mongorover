@@ -144,7 +144,7 @@ append_stack_value_to_bson_doc(lua_State *L,
             break;
         };
         case LUA_TSTRING: {
-            char *value;
+            const char *value;
             value = lua_tostring(L, absolute_stack_index);
             bson_append_utf8(bson_doc, key, -1, value, -1);
             break;
@@ -533,7 +533,7 @@ bson_subdocument_or_subarray_to_table(lua_State *L,
 
         if (!(_iterate_and_add_values_document_or_array_to_table(L, -1, bson_doc,
                                                                  &child, !is_array,
-                                                                 absolute_luaBSONObjects_index, &error)))
+                                                                 absolute_luaBSONObjects_index, error)))
         {
             return false;
         }

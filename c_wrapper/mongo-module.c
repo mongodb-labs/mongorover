@@ -17,18 +17,6 @@
 #include "mongo-module.h"
 
 int
-lua_mongo_get_object_id(lua_State *L)
-{
-    char *key;
-
-    key = lua_checkstack(L, 1);
-    if (!key) {
-        luaL_error(L, "first parameter must be a string");
-    }
-
-}
-
-int
 luaopen_mongo_module(lua_State *L)
 {
     //initialize mongo_client

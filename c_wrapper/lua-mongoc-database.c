@@ -118,7 +118,7 @@ int
 lua_mongo_database_command_simple(lua_State *L)
 {
     database_t *database;
-    char *command_name;
+    const char *command_name;
     bson_t command = BSON_INITIALIZER;
     bson_t reply = BSON_INITIALIZER;
     bson_error_t error;
