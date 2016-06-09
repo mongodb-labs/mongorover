@@ -2,6 +2,7 @@ local MongoClient = require("mongorover.MongoClient")
 local client = MongoClient.new("mongodb://localhost:27017/")
 local exampleDatabase = client:getDatabase("exampleDB")
 local exampleCollection = exampleDatabase:getCollection("exampleCollection")
+local BSONNull = require("mongorover.luaBSONObjects.BSONNull")
 
 -- Drop database to get a clean slate for this example.
 exampleCollection:drop()

@@ -35,4 +35,4 @@ static const struct luaL_Reg mongo_module_functions[] = {
     { NULL,  NULL }
 };
 
-#endif LUA_MONGO_MODULE_H
+#endif //LUA_MONGO_MODULE_H
