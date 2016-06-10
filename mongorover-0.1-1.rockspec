@@ -66,5 +66,6 @@ package = "mongorover"
           ["mongorover.resultObjects.InsertManyResult"] = "src/resultObjects/InsertManyResult.lua",
           ["mongorover.resultObjects.UpdateResult"] = "src/resultObjects/UpdateResult.lua",
           ["mongorover.resultObjects.DeleteResult"] = "src/resultObjects/DeleteResult.lua"
-     }
+     },
+     copy_directories = { "test" }
  }

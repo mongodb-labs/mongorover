@@ -16,6 +16,6 @@ limitations under the License.
 
 --]]
 
-require('test_client')
-require('test_database')
-require('test_collection')
+require('TestClient')
+require('TestDatabase')
+require('TestCollection')

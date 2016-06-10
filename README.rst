@@ -109,9 +109,25 @@ Generated documentation can be found in the *doc/* directory.
 Testing
 =======
 
+Before running tests, you need to make sure to be running a MongoDB in the background with authentication on. You can create the user to run the test suite with these commands in mongo shell.
+
+.. code-block:: bash
+
+  use admin
+  db.createUser(
+    {
+      user: "mr_user",
+      pwd: "mr_password",
+      roles: [
+         { role: "clusterMonitor", db: "admin" },
+         { role: "readWrite", db: "mr_test_suite" },
+         { role: "dbAdmin", db: "mr_test_suite" }
+      ]
+    }
+  )
+
 The easiest way to run the tests is to run the following command in the test directory. Note that you will need luaunit_ to run the tests.
 
 .. code-block:: bash
 
-    lua luaUnitTest.lua
-
+    lua RunAllTests.lua
