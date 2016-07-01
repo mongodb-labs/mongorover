@@ -22,16 +22,10 @@ limitations under the License.
 --- Result objects that are returned from MongoDB CRUD operations.
 -- @type mongorover.resultObjects
 
-local importPrepend = ""
-local mongorover_environment = _G["__MONGOROVER_TEST_ENVIRONMENT"]
-if mongorover_environment == nil or mongorover_environment then
-	importPrepend = "mongorover."
-end
-
-local InsertOneResult = require(importPrepend .. 'resultObjects.InsertOneResult')
-local InsertManyResult = require(importPrepend .. 'resultObjects.InsertManyResult')
-local UpdateResult = require(importPrepend .. 'resultObjects.UpdateResult')
-local DeleteResult = require(importPrepend .. 'resultObjects.DeleteResult')
+local InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
+local InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
+local UpdateResult = require("mongorover.resultObjects.UpdateResult")
+local DeleteResult = require("mongorover.resultObjects.DeleteResult")
 
 local objects = {InsertOneResult = InsertOneResult,
 	InsertManyResult = InsertManyResult,

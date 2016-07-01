@@ -16,18 +16,8 @@ limitations under the License.
 
 --]]
 
-local importPrepend = ""
-if _G["__MONGOROVER_TEST_ENVIRONMENT"] then
-	-- Overwrite cpath to ensure only the locally created debug build is imported.
-	package.cpath = "../?.dylib;../?.so"
-else
-	importPrepend = "mongorover."
-end
-
 local MongoModule = require("mongo_module")
-local MongoDatabase = require(importPrepend .. "MongoDatabase")
-local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
-local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
+local MongoDatabase = require("mongorover.MongoDatabase")
 
 --- Tools for connecting to MongoDB.
 -- @module mongorover.MongoClient

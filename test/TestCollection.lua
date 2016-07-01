@@ -19,23 +19,13 @@ limitations under the License.
 require('luaHelperFunctions')
 local lu = require("luaunit")
 
-dofile("setReleaseType.lua")
-local importPrepend = ""
-if _G["__MONGOROVER_TEST_ENVIRONMENT"] then
-	package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
-	package.cpath = "../?.dylib;../?.so"
-else
-	importPrepend = "mongorover."
-end
-
 local BaseTest = require("BaseTest")
-local MongoClient = require(importPrepend .. "MongoClient")
-local ObjectId = require(importPrepend .. "luaBSONObjects.ObjectId")
-local BSONNull = require(importPrepend .. "luaBSONObjects.BSONNull")
-local InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
-local InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
-local UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
-local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
+
+local ObjectId = require("mongorover.luaBSONObjects.ObjectId")
+local BSONNull = require("mongorover.luaBSONObjects.BSONNull")
+local InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
+local InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
+local UpdateResult = require("mongorover.resultObjects.UpdateResult")
 
 
 TestCollection = {}

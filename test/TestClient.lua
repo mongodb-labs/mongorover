@@ -19,17 +19,9 @@ limitations under the License.
 require('luaHelperFunctions')
 local lu = require("luaunit")
 
-dofile("setReleaseType.lua")
-local importPrepend = ""
-if _G["__MONGOROVER_TEST_ENVIRONMENT"] then
-	package.path = package.path .. ';./src/?.lua;./test/?.lua;../src/?.lua'
-	package.cpath = "../?.dylib;../?.so"
-else
-	importPrepend = "mongorover."
-end
-
 local BaseTest = require("BaseTest")
-local MongoClient = require(importPrepend .. "MongoClient")
+
+local MongoClient = require("mongorover.MongoClient")
 
 
 TestClient = {}

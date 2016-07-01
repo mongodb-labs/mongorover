@@ -4,14 +4,8 @@
 --- Lua representations of BSON objects.
 -- @type mongorover.luaBSONObjects
 
-local importPrepend = ""
-local mongorover_environment = _G["__MONGOROVER_TEST_ENVIRONMENT"]
-if mongorover_environment == nil or mongorover_environment then
-	importPrepend = "mongorover."
-end
-
-local BSONNull = require(importPrepend .. 'luaBSONObjects.BSONNull')
-local ObjectId = require(importPrepend .. 'luaBSONObjects.ObjectId')
+local BSONNull = require('mongorover.luaBSONObjects.BSONNull')
+local ObjectId = require('mongorover.luaBSONObjects.ObjectId')
 
 local objects = {
 	BSONNull = BSONNull,
