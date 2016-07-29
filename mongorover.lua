@@ -39,7 +39,7 @@ local mongo_rover = setmetatable(objects, {
 	__index = objects,
 	__newindex = function(table, key, value)
 								error("mongo_rover cannot be modified, it is a read-only table")
-							end,
+							end
 })
 
 return mongo_rover

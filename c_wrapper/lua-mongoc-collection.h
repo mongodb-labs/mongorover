@@ -39,7 +39,6 @@ static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_drop", lua_mongo_collection_drop },
     { "collection_count", lua_mongo_collection_count },
     { "collection_find", lua_mongo_collection_find },
-    { "collection_find_one", lua_mongo_collection_find_one },
     { "collection_insert_one", lua_mongo_collection_insert_one },
     { "collection_insert_many", lua_mongo_collection_insert_many },
     { "collection_update_one", lua_mongo_collection_update },

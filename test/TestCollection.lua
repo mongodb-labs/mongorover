@@ -141,6 +141,22 @@ setmetatable(TestCollection, {__index = BaseTest})
 		lu.assertErrorMsgContains("unknown operator: $bad_op",
 														function() for result in results do print(result) end end)
 	end
+
+	function TestCollection:test_find_options()
+		for i = 0,9 do
+			self.collection:insert_one({x = i})
+		end
+
+		lu.assertEquals(10, self.collection:count())
+
+		local total = 0
+		local results = self.collection:find(nil, nil, {skip = 4, limit = 2})
+		for result in results do
+			total = total + result.x
+		end
+
+		lu.assertEquals(total, 9)
+	end
 	
 	function TestCollection:test_update_one()
 		local id1 = self.collection:insert_one({x = 5}).inserted_id

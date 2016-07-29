@@ -16,7 +16,10 @@ limitations under the License.
 
 --]]
 
+
 local MongoModule = require("mongo_module")
+local MongoCursor = require("mongorover.MongoCursor")
+local CursorType = require("mongorover.CursorType")
 local luaBSONObjects = require("mongorover.luaBSONObjects")
 local InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
 local InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
@@ -56,7 +59,7 @@ local MongoCollection = {__mode="k"}
 	
 	---
 	-- Returns the number of documents in a collection matching the query input parameter.
-    -- Example usage at @{update_many.lua}.
+		-- Example usage at @{update_many.lua}.
 	-- @tparam[opt] table query A table containing a query.
 	-- @tparam[opt] int skip The number of documents to skip.
 	-- @tparam[opt] int limit The maximum number of matching documents to return.
@@ -67,47 +70,118 @@ local MongoCollection = {__mode="k"}
 		limit = limit or 0
 		return self.collection_t:collection_count(luaBSONObjects, query, skip, limit)
 	end
-	
+
 	---
-	-- Internal function used to create an anonymous function iterator that returns the next document.
-	-- in the given cursor every time it is iterated over.
-	-- @local
-	-- @tparam MongoCollection collection Needs to instantiate with a reference to the collection to ensure the collection is
-	-- not garbage collected before the cursor.
-	-- @tparam MongoCursor mongo_cursor A cursor from the C wrapper.
-	local function createCursorIterator (collection, mongo_cursor)
-		-- Table necessary to prevent MongoCollection from being garbage collected before cursor.
-		-- Table has to have relevant information in it, to prevent garbage collection.
-		local mongoCursorPointer = {collection=collection, cursor_t=mongo_cursor}
-		setmetatable(mongoCursorPointer, {__mode = "k"})
-		
-		return function ()
-                       return mongoCursorPointer["cursor_t"]:next(luaBSONObjects)
-                   end
-	end
-	
-	---
-	-- Selects documents in a collection and returns an iterator to the selected documents.
+	-- Selects documents in a collection and returns an iterator to the selected
+	-- documents.
 	-- Example usage at @{find.lua}.
-	-- @tparam[opt] table query Specifies criteria using query operators. To return all documents, either
-	-- do not use query parameter or pass in an empty document ({}).
-	-- @tparam[opt] table fields projection  Specifies the fields to return using projection operators. Default value returns all fields.
-	-- @treturn iterator An iterator with results.
-	function MongoCollection:find(query, fields)
+	-- @tparam[opt] table query Specifies criteria using query operators.
+	-- @tparam[opt] table fields Specifies the fields to return using projection
+	-- operators. Default value returns all fields.
+	-- @tparam[opt] table options additional parameters to alter behaviour of
+	-- find.
+	-- @tparam[opt] int options.skip The number of matching documents to skip
+	-- before returning results.
+	-- @tparam[opt] int options.limit The maximum number of results to return.
+	-- @tparam[opt] boolean options.no_cursor_timeout if false (the default), any
+	--  returned cursor is closed by the server after 10 minutes of
+	--  inactivity. If set to True, the returned cursor will never
+	--  time out on the server. Care should be taken to ensure that
+	--  cursors with no_cursor_timeout turned on are properly closed.
+	--  cursor_type the type of cursor to return. The valid
+	--  options are defined by @{mongorover.CursorType}
+	-- @tparam[opt] boolean options.oplog_replay If true, set the oplogReplay
+	-- query tag.
+	-- @tparam[opt] int options.batch_size Limits the number of documents
+	-- returned in a single batch.
+	-- @return A @{MongoCursor} with results.
+	function MongoCollection:find(query, fields, options)
 		query = query or {}
 		fields = fields or {}
-		local cursor_t = self.collection_t:collection_find(luaBSONObjects, query, fields)
-		return createCursorIterator(self, cursor_t)
+		options = options or {}
+		local default_options = {
+			skip = 0,
+			limit = 0,
+			no_cursor_timeout = false,
+			cursor_type = CursorType.NON_TAILABLE,
+			allow_partial_results = false,
+			oplog_replay = false,
+			batch_size = 0
+		}
+
+		setmetatable(options, {__index = default_options})
+
+		local rev_index_cursor_type = {}
+		for _cursor_type, val in pairs(CursorType) do
+			rev_index_cursor_type[val] = true
+		end
+		assert(type(options.cursor_type) == "number" and rev_index_cursor_type[options.cursor_type],
+					"not a valid value for cursor_type")
+
+		local query_flags = options.cursor_type
+
+		-- more_query_flags is needed because bitwise support for Lua 5.1 to 5.3
+		-- is not fun. It can be done in the C layer by just iterating through
+		-- this list and or'ing all the values to query_flags.
+		local more_query_flags = {}
+		if no_cursor_timeout then
+			more_query_flags[#more_query_flags+1] = CursorType._QUERY_OPTIONS.no_timeout
+		end
+		if allow_partial_results then
+			more_query_flags[#more_query_flags+1] = CursorType._QUERY_OPTIONS.partial
+		end
+		if oplog_replay then
+			more_query_flags[#more_query_flags+1] = CursorType._QUERY_OPTIONS.oplog_replay
+		end
+
+		local cursor_t = self.collection_t:collection_find(luaBSONObjects,
+																												query_flags,
+																												more_query_flags,
+																												options.skip,
+																												options.limit,
+																												options.batch_size,
+																												query,
+																												fields)
+
+		return MongoCursor(self, cursor_t)
 	end
-	
+
 	---
-	-- Returns one document that satisfies the specified query criteria.
+	-- Get a single document from the database. Input arguments are the same as
+	-- @{MongoCollection:find}
 	-- Example usage at @{find.lua}.
-	-- @tparam[opt] table query Specifies criteria using query operators. 
-	-- @tparam[opt] table fields Specifies the fields to return using projection operators. Default value returns all fields.
+	-- @tparam[opt] table query Specifies criteria using query operators.
+	-- @tparam[opt] table fields Specifies the fields to return using projection
+	-- operators. Default value returns all fields.
+	-- @tparam[opt] table options additional parameters to alter behaviour of
+	-- find.
+	-- @tparam[opt] int options.skip The number of matching documents to skip
+	-- before returning results.
+	-- @tparam[opt] int options.limit The maximum number of results to return.
+	-- @tparam[opt] boolean options.no_cursor_timeout if false (the default), any
+	--  returned cursor is closed by the server after 10 minutes of
+	--  inactivity. If set to True, the returned cursor will never
+	--  time out on the server. Care should be taken to ensure that
+	--  cursors with no_cursor_timeout turned on are properly closed.
+	--  cursor_type the type of cursor to return. The valid
+	--  options are defined by @{mongorover.CursorType}
+	-- @tparam[opt] boolean options.oplog_replay If true, set the oplogReplay
+	-- query tag.
+	-- @tparam[opt] int options.batch_size Limits the number of documents
+	-- returned in a single batch.
 	-- @treturn table First document found with the query provided.
-	function MongoCollection:find_one(query, fields)
-		return self.collection_t:collection_find_one(luaBSONObjects, query, fields)
+	function MongoCollection:find_one(query, fields, options)
+		options = options or {}
+		options.limit = 1
+
+		local results = self:find(query, fields, options)
+		local ret_val
+		for result in results do
+			ret_val = result
+			break
+		end
+
+		return ret_val
 	end
 	
 	---
@@ -188,7 +262,7 @@ local MongoCollection = {__mode="k"}
 	-- @treturn iterator An iterator with results.
 	function MongoCollection:aggregate(aggregationPipeline)
 		local cursor_t = self.collection_t:collection_aggregate(luaBSONObjects, aggregationPipeline)
-		return createCursorIterator(self, cursor_t)
+		return MongoCursor(self, cursor_t)
 	end
 
 local metatable = {
