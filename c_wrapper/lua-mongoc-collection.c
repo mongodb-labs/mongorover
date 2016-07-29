@@ -121,7 +121,7 @@ lua_mongo_collection_count(lua_State *L)
         goto DONE;
     }
 
-    DONE:
+DONE:
     bson_destroy(&query);
 
     if (throw_error) {
@@ -133,21 +133,48 @@ lua_mongo_collection_count(lua_State *L)
     return 1;
 }
 
+
 int
 lua_mongo_collection_find(lua_State *L)
 {
     collection_t *collection;
+    uint32_t skip = 0;
+    uint32_t limit = 0;
+    uint32_t batch_size = 0;
+    uint32_t query_flags = 0;
     bson_t query = BSON_INITIALIZER;
     bson_t fields = BSON_INITIALIZER;
+
     mongoc_cursor_t *cursor;
     bool throw_error = false;
     bson_error_t error;
 
     int absolute_luaBSONObjects_index = 2;
-    int query_index = 3;
-    int fields_index = 4;
+    int query_flags_index = 3;
+    int more_query_flags_index = 4;
+    int skip_index = 5;
+    int limit_index = 6;
+    int batch_size_index = 7;
+    int query_index = 8;
+    int fields_index = 9;
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+    query_flags = (uint32_t) luaL_checknumber(L, query_flags_index);
+
+    lua_pushnil(L);
+    while (lua_next(L, more_query_flags_index) != 0) {
+        query_flags |= (int) lua_tonumber(L, -1);
+        lua_pop(L, 1);
+    }
+
+    skip = (uint32_t) luaL_checknumber(L, skip_index);
+    limit = (uint32_t) luaL_checknumber(L, limit_index);
+    batch_size = (uint32_t) luaL_checknumber(L, batch_size_index);
+
+    luaL_argcheck(L, lua_isnil(L, query_index) | lua_istable(L, query_index), query_index,
+                  "query must be nil or a table");
+    luaL_argcheck(L, lua_isnil(L, fields_index) | lua_istable(L, fields_index), fields_index,
+                  "fields must be nil or a table");
 
     if (!(lua_isnil(L, query_index))) {
         throw_error = !(lua_table_to_bson(L, &query, query_index, false, absolute_luaBSONObjects_index, &error));
@@ -164,12 +191,17 @@ lua_mongo_collection_find(lua_State *L)
     }
 
     cursor = mongoc_collection_find(collection->c_collection,
-                                    MONGOC_QUERY_NONE, 0, 0, 0,
-                                    &query, &fields, NULL);
+                                    query_flags,
+                                    skip,
+                                    limit,
+                                    batch_size,
+                                    &query,
+                                    &fields,
+                                    NULL);
 
     lua_mongo_cursor_new(L, cursor);
 
-    DONE:
+DONE:
     bson_destroy(&query);
     bson_destroy(&fields);
 
@@ -178,73 +210,6 @@ lua_mongo_collection_find(lua_State *L)
     }
 
     return 1;
-}
-
-int
-lua_mongo_collection_find_one(lua_State *L)
-{
-    collection_t *collection;
-    bson_t query = BSON_INITIALIZER;
-    bson_t fields = BSON_INITIALIZER;
-    mongoc_cursor_t *cursor = NULL;
-    const bson_t *doc;
-    int num_ret_vals;
-    bool throw_error = false;
-    bson_error_t error;
-
-    int absolute_luaBSONObjects_index = 2;
-    int query_index = 3;
-    int fields_index = 4;
-
-    collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
-
-    if (!(lua_isnil(L, query_index))) {
-        throw_error = !(lua_table_to_bson(L, &query, query_index, false, absolute_luaBSONObjects_index, &error));
-        if (throw_error) {
-            goto DONE;
-        }
-    }
-
-    if (!(lua_isnil(L, fields_index))) {
-        throw_error = !(lua_table_to_bson(L, &fields, fields_index, false, absolute_luaBSONObjects_index, &error));
-        if (throw_error) {
-            goto DONE;
-        }
-    }
-
-    cursor = mongoc_collection_find(collection->c_collection,
-                                    MONGOC_QUERY_NONE, 0, 0, 0,
-                                    &query, &fields, NULL);
-
-    if (!(mongoc_cursor_next(cursor, &doc))) {
-        throw_error = mongoc_cursor_error(cursor, &error);
-        if (throw_error) {
-            goto DONE;
-        } else {
-            // Cursor did not error, but did not have anything in it.
-            num_ret_vals = 0;
-        }
-    } else {
-        num_ret_vals = 1;
-        throw_error = !(bson_document_or_array_to_table(L, doc, true, absolute_luaBSONObjects_index, &error));
-        if (throw_error) {
-            goto DONE;
-        }
-    }
-
-    DONE:
-    bson_destroy(&query);
-    bson_destroy(&fields);
-
-    if (cursor) {
-        mongoc_cursor_destroy(cursor);
-    }
-
-    if (throw_error) {
-        luaL_error(L, error.message);
-    }
-
-    return num_ret_vals;
 }
 
 
@@ -320,7 +285,7 @@ lua_mongo_collection_update(lua_State *L)
         goto DONE;
     }
 
-    DONE:
+DONE:
     bson_destroy(&filter);
     bson_destroy(&update);
     bson_destroy(&reply);
@@ -375,7 +340,7 @@ lua_mongo_collection_insert_one(lua_State *L)
     lua_pushstring(L, "_id");
     lua_gettable(L, document_index);
 
-    DONE:
+DONE:
     bson_destroy(&bson_doc);
     bson_destroy(&reply);
 
@@ -473,7 +438,7 @@ lua_mongo_collection_insert_many(lua_State *L)
         lua_pop(L, 1);
     }
 
-    DONE:
+DONE:
     bson_destroy(&reply);
 
     if (bulk_insert) {
@@ -523,7 +488,7 @@ int lua_mongo_collection_aggregate(lua_State *L)
                                          &aggregation_pipeline,
                                          NULL, NULL);
 
-    DONE:
+DONE:
     bson_destroy(&aggregation_pipeline);
     bson_destroy(&inner_aggregation_pipeline);
 
@@ -583,7 +548,7 @@ lua_mongo_collection_delete_one(lua_State *L)
         goto DONE;
     }
 
-    DONE:
+DONE:
     bson_destroy(&selector);
     if (bulk_remove) {
         mongoc_bulk_operation_destroy(bulk_remove);
@@ -639,7 +604,7 @@ lua_mongo_collection_delete_many(lua_State *L)
         goto DONE;
     }
 
-    DONE:
+DONE:
     bson_destroy(&selector);
     if (bulk_remove) {
         mongoc_bulk_operation_destroy(bulk_remove);

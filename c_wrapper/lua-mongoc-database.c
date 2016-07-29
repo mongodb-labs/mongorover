@@ -171,7 +171,7 @@ lua_mongo_database_command_simple(lua_State *L)
         goto DONE;
     }
 
-    DONE:
+DONE:
     bson_destroy(&command);
     bson_destroy(&reply);
 

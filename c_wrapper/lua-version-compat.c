@@ -61,3 +61,4 @@ newlib_compat(lua_State *L,
     luaL_register(L, name_for_lua51, R);
 #endif
 }
+

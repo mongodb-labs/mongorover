@@ -47,7 +47,16 @@ package = "mongorover"
      modules = {
 
         ["mongo_module"] = {
-          sources = {"c_wrapper/mongo-module.c", "c_wrapper/lua-mongoc-client.c", "c_wrapper/lua-mongoc-database.c", "c_wrapper/lua-mongoc-collection.c", "c_wrapper/lua-bson.c", "c_wrapper/lua-version-compat.c", "c_wrapper/lua-object-generators.c", "c_wrapper/lua-mongo-cursor.c"},
+          sources = {
+            "c_wrapper/mongo-module.c",
+            "c_wrapper/lua-mongoc-client.c",
+            "c_wrapper/lua-mongoc-database.c",
+            "c_wrapper/lua-mongoc-collection.c",
+            "c_wrapper/lua-bson.c",
+            "c_wrapper/lua-version-compat.c",
+            "c_wrapper/lua-object-generators.c",
+            "c_wrapper/lua-mongo-cursor.c"
+          },
           libraries = {"mongoc-1.0", "bson-1.0"},
           incdirs = {"$(LIBMONGOC_INCDIR)/libmongoc-1.0", "$(LIBBSON_INCDIR)/libbson-1.0"},
           libdirs = {"$(LIBMONGOC_LIBDIR)", "$(LIBBSON_LIBDIR)"}
@@ -58,6 +67,8 @@ package = "mongorover"
         ["mongorover.MongoClient"] = "src/MongoClient.lua",
         ["mongorover.MongoDatabase"] = "src/MongoDatabase.lua",
         ["mongorover.MongoCollection"] = "src/MongoCollection.lua",
+        ["mongorover.MongoCursor"] = "src/MongoCursor.lua",
+        ["mongorover.CursorType"] = "src/CursorType.lua",
         ["mongorover.luaBSONObjects"] = "src/luaBSONObjects.lua",
           ["mongorover.luaBSONObjects.BSONNull"] = "src/luaBSONObjects/BSONNull.lua",
           ["mongorover.luaBSONObjects.ObjectId"] = "src/luaBSONObjects/ObjectId.lua",
