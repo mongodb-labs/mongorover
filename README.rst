@@ -55,7 +55,8 @@ Additional dependencies are:
 
 - `MongoDB C Driver <https://github.com/mongodb/mongo-c-driver/tree/1.2.0-dev>`_
 - To generate documentation: `ldoc <https://github.com/stevedonovan/LDoc>`_
-- To run the tests: `luaunit <https://github.com/bluebird75/luaunit>`_
+- To run the tests: `luaunit <https://github.com/bluebird75/luaunit>`_. At the current moment, the luarock is
+outdated, so please install from github.
 
 Examples
 ========
@@ -126,7 +127,8 @@ Before running tests, you need to make sure to be running a MongoDB in the backg
     }
   )
 
-The easiest way to run the tests is to run the following command in the test directory. Note that you will need luaunit_ to run the tests.
+The easiest way to run the tests is to run the following command in the test directory. Note that you will need
+luaunit_ to run the tests. Make sure you installed luaunit from source instead of luarocks.
 
 .. code-block:: bash
 
