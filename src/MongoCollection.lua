@@ -16,19 +16,12 @@ limitations under the License.
 
 --]]
 
-local importPrepend = ""
-if _G["__MONGOROVER_TEST_ENVIRONMENT"] then
-	-- Overwrite cpath to ensure only the locally created debug build is imported.
-	package.cpath = "../?.dylib;../?.so"
-else
-	importPrepend = "mongorover."
-end
 local MongoModule = require("mongo_module")
-local luaBSONObjects = require(importPrepend .. "luaBSONObjects")
-local InsertOneResult = require(importPrepend .. "resultObjects.InsertOneResult")
-local InsertManyResult = require(importPrepend .. "resultObjects.InsertManyResult")
-local UpdateResult = require(importPrepend .. "resultObjects.UpdateResult")
-local DeleteResult = require(importPrepend .. "resultObjects.DeleteResult")
+local luaBSONObjects = require("mongorover.luaBSONObjects")
+local InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
+local InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
+local UpdateResult = require("mongorover.resultObjects.UpdateResult")
+local DeleteResult = require("mongorover.resultObjects.DeleteResult")
 
 --- Collection level utilities for Mongo.
 -- @module mongorover.MongoCollection

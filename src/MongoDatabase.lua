@@ -16,13 +16,9 @@ limitations under the License.
 
 --]]
 
-local importPrepend = ""
-if not _G["__MONGOROVER_TEST_ENVIRONMENT"] then
-	importPrepend = "mongorover."
-end
-local luaBSONObjects = require(importPrepend .. "luaBSONObjects")
 local MongoModule = require("mongo_module")
-local MongoCollection = require(importPrepend .. "MongoCollection")
+local luaBSONObjects = require("mongorover.luaBSONObjects")
+local MongoCollection = require("mongorover.MongoCollection")
 
 
 --- Database level operations.
