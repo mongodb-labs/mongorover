@@ -16,10 +16,8 @@ limitations under the License.
 
 --]]
 
-EXPORT_ASSERT_TO_GLOBALS = true
-
 require('luaHelperFunctions')
-require("luaunit")
+local lu = require("luaunit")
 
 dofile("setReleaseType.lua")
 local importPrepend = ""
@@ -31,7 +29,6 @@ else
 end
 
 local BaseTest = require("BaseTest")
-local MongoClient = require(importPrepend .. "MongoClient")
 
 
 TestDatabase = {}
@@ -42,19 +39,19 @@ setmetatable(TestDatabase, {__index = BaseTest})
 		self.collection:insert_one({})
 		
 		local database_names = self.client:getDatabaseNames()
-		assertTrue(inArray(self.database_name, database_names))
+		lu.assertTrue(inArray(self.database_name, database_names))
 		
 		self.database:drop_database()
 		database_names = self.client:getDatabaseNames()
-		assertFalse(inArray(self.database_name, database_names))
+		lu.assertFalse(inArray(self.database_name, database_names))
 	end
 
 	function TestDatabase:test_database_index_into_collection()
-		assertEquals(self.collection_name, "foo", "this test assumes collection name is foo")
+		lu.assertEquals(self.collection_name, "foo", "this test assumes collection name is foo")
 
 		local other_collection = self.database.foo
 		local count = other_collection:count()
-		assertEquals(count, 0)
+		lu.assertEquals(count, 0)
 
 		local document_to_insert = {["test"] = "test_database_index_into_collection"}
 		
@@ -62,19 +59,19 @@ setmetatable(TestDatabase, {__index = BaseTest})
 		self.collection:insert_one(document_to_insert)
 		local document = other_collection:find_one()
 		
-		assertTrue(table_eq(document_to_insert, document))
+		lu.assertTrue(table_eq(document_to_insert, document))
 	end
 	
 	function TestDatabase:test_get_collection_names()
 		self.collection:insert_one({})
 		
 		local collection_names = self.database:getCollectionNames()
-		assertTrue(inArray(self.collection_name, collection_names))
+		lu.assertTrue(inArray(self.collection_name, collection_names))
 		
 		self.collection:drop()
 		
 		collection_names = self.database:getCollectionNames()
-		assertFalse(inArray(self.collection_name, collection_names))
+		lu.assertFalse(inArray(self.collection_name, collection_names))
 	end
 	
 	function TestDatabase:test_command()
@@ -82,19 +79,18 @@ setmetatable(TestDatabase, {__index = BaseTest})
 		
 		-- Test default value defaulting to 1.
 		local response = self.database:command("buildinfo")
-		assertTrue(response.ok)
+		lu.assertTrue(response.ok)
 		
 		-- Test value given.
 		response = self.database:command("collstats", self.collection_name)
-		assertTrue(response.ok)
+		lu.assertTrue(response.ok)
 		
 		-- Test command options.
 		response = self.database:command("distinct", self.collection_name, {key = "x"})
 		local values = response.values
 		
-		assertTrue(inArray(1, values))
-		assertTrue(inArray(2, values))		
+		lu.assertTrue(inArray(1, values))
+		lu.assertTrue(inArray(2, values))
 	end
 
-lu = LuaUnit.new()
-lu:runSuite()
+lu.run()
