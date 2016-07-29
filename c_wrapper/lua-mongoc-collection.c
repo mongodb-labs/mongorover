@@ -213,7 +213,7 @@ lua_mongo_collection_find_one(lua_State *L)
     }
 
     cursor = mongoc_collection_find(collection->c_collection,
-                                    MONGOC_QUERY_NONE, 0, 0, -1,
+                                    MONGOC_QUERY_NONE, 0, 0, 0,
                                     &query, &fields, NULL);
 
     if (!(mongoc_cursor_next(cursor, &doc))) {
