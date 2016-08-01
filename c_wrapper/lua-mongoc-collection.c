@@ -452,6 +452,52 @@ DONE:
     return 2;
 }
 
+int lua_mongo_collection_create_index(lua_State *L)
+{
+	bool ret=false;
+    bool throw_error=false;
+
+    collection_t *collection;
+    bson_t keys = BSON_INITIALIZER;
+    bson_error_t error;
+
+    mongoc_index_opt_t opt;
+    mongoc_index_opt_init(&opt);
+
+    int absolute_luaBSONObjects_index = 2;
+    int keys_index = 3;
+    int opt_index = 4;
+
+    if (!(lua_isnil(L, keys_index))){
+		throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
+		if(throw_error){
+			goto DONE;
+		}
+    }
+
+    if (!(lua_isnil(L, opt_index))){
+		throw_error = !(add_lua_table_contents_to_bson_doc(L, &opt, opt_index, false, absolute_luaBSONObjects_index, &error ));
+		if(throw_error){
+			goto DONE;
+		}
+    }
+
+    collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+	ret=mongoc_collection_create_index(collection->c_collection, &keys, &opt, &error);
+    lua_pushboolean(L, ret);
+    if(!ret){
+		throw_error=true;
+		goto DONE;
+    }
+
+DONE:
+    bson_destroy(&keys);
+    if(throw_error){
+		luaL_error(L, error.message);
+    }
+    return 1;
+}
 
 int lua_mongo_collection_aggregate(lua_State *L)
 {

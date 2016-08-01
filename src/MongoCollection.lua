@@ -265,6 +265,16 @@ local MongoCollection = {__mode="k"}
 		return MongoCursor(self, cursor_t)
 	end
 
+	---
+	-- Create and index on any field or combination of fields in the collection.
+	-- Example usage at @{indexing.lua}.
+	-- @tparam {table,...} key value pairs of keys to be indexed
+	-- @tparam {table,...} key value pairs of options to be used when creating index
+	-- @return a boolean true if index created successfully
+	function MongoCollection:createIndex(keys,ops)
+	    return self.collection_t:collection_create_index(luaBSONObjects,keys,ops)
+	end
+
 local metatable = {
 	__index = MongoCollection,
 	__call = function(table, ...) 
