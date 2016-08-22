@@ -20,6 +20,8 @@ limitations under the License.
 require('luaHelperFunctions')
 require("luaunit")
 
+package.cpath = package.cpath .. ';../?.so'
+package.path = package.path .. ';../?.lua;../mongorover/?.lua;'
 local MongoClient = require("mongorover.MongoClient")
 
 
