@@ -64,19 +64,19 @@ package = "mongorover"
 
         mongorover = "mongorover.lua",
 
-        ["mongorover.MongoClient"] = "src/MongoClient.lua",
-        ["mongorover.MongoDatabase"] = "src/MongoDatabase.lua",
-        ["mongorover.MongoCollection"] = "src/MongoCollection.lua",
-        ["mongorover.MongoCursor"] = "src/MongoCursor.lua",
-        ["mongorover.CursorType"] = "src/CursorType.lua",
-        ["mongorover.luaBSONObjects"] = "src/luaBSONObjects.lua",
-          ["mongorover.luaBSONObjects.BSONNull"] = "src/luaBSONObjects/BSONNull.lua",
-          ["mongorover.luaBSONObjects.ObjectId"] = "src/luaBSONObjects/ObjectId.lua",
-        ["mongorover.resultObjects"] = "src/resultObjects.lua",
-          ["mongorover.resultObjects.InsertOneResult"] = "src/resultObjects/InsertOneResult.lua",
-          ["mongorover.resultObjects.InsertManyResult"] = "src/resultObjects/InsertManyResult.lua",
-          ["mongorover.resultObjects.UpdateResult"] = "src/resultObjects/UpdateResult.lua",
-          ["mongorover.resultObjects.DeleteResult"] = "src/resultObjects/DeleteResult.lua"
+        ["mongorover.MongoClient"] = "mongorover/MongoClient.lua",
+        ["mongorover.MongoDatabase"] = "mongorover/MongoDatabase.lua",
+        ["mongorover.MongoCollection"] = "mongorover/MongoCollection.lua",
+        ["mongorover.MongoCursor"] = "mongorover/MongoCursor.lua",
+        ["mongorover.CursorType"] = "mongorover/CursorType.lua",
+        ["mongorover.luaBSONObjects"] = "mongorover/luaBSONObjects.lua",
+          ["mongorover.luaBSONObjects.BSONNull"] = "mongorover/luaBSONObjects/BSONNull.lua",
+          ["mongorover.luaBSONObjects.ObjectId"] = "mongorover/luaBSONObjects/ObjectId.lua",
+        ["mongorover.resultObjects"] = "mongorover/resultObjects.lua",
+          ["mongorover.resultObjects.InsertOneResult"] = "mongorover/resultObjects/InsertOneResult.lua",
+          ["mongorover.resultObjects.InsertManyResult"] = "mongorover/resultObjects/InsertManyResult.lua",
+          ["mongorover.resultObjects.UpdateResult"] = "mongorover/resultObjects/UpdateResult.lua",
+          ["mongorover.resultObjects.DeleteResult"] = "mongorover/resultObjects/DeleteResult.lua"
      },
      copy_directories = { "test" }
  }

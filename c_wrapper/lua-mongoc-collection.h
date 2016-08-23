@@ -26,7 +26,6 @@ int lua_mongo_collection_new (lua_State *L);
 int lua_mongo_collection_drop (lua_State *L);
 int lua_mongo_collection_count (lua_State *L);
 int lua_mongo_collection_find (lua_State *L);
-int lua_mongo_collection_find_one (lua_State *L);
 int lua_mongo_collection_insert_one (lua_State *L);
 int lua_mongo_collection_insert_many (lua_State *L);
 int lua_mongo_collection_update (lua_State *L);

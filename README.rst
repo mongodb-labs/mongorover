@@ -46,6 +46,14 @@ After installing the above C libraries successfully, if you have `luarocks
 should be able to do **luarocks install mongorover** to install
 mongorover. Otherwise you can download the project source and do **luarocks make** to install.
 
+Alternatively, you can build using `CMake <https://cmake.org/>`_, even though it is highly encouraged to use the Luarocks ecosystem. You can build by executing the following commands in the home directory. Take note that unless forced to use Lua 5.1 (see comment below), CMake_ will use the highest version of Lua found. ::
+
+  $ mkdir build
+  $ cd build
+  $ cmake .. # can force Lua 5.1 by using -DLUA_FORCE_LUA51=ON
+  $ make .
+
+
 Dependencies
 ============
 
@@ -55,8 +63,7 @@ Additional dependencies are:
 
 - `MongoDB C Driver <https://github.com/mongodb/mongo-c-driver/tree/1.2.0-dev>`_
 - To generate documentation: `ldoc <https://github.com/stevedonovan/LDoc>`_
-- To run the tests: `luaunit <https://github.com/bluebird75/luaunit>`_. At the current moment, the luarock is
-outdated, so please install from github.
+- To run the tests: `luaunit <https://github.com/bluebird75/luaunit>`_. At the current moment, the luarock is outdated, so please install from github.
 
 Examples
 ========
