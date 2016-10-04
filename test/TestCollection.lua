@@ -23,6 +23,7 @@ local BaseTest = require("BaseTest")
 
 local ObjectId = require("mongorover.luaBSONObjects.ObjectId")
 local BSONNull = require("mongorover.luaBSONObjects.BSONNull")
+local BSONDate = require("mongorover.luaBSONObjects.BSONDate")
 local InsertOneResult = require("mongorover.resultObjects.InsertOneResult")
 local InsertManyResult = require("mongorover.resultObjects.InsertManyResult")
 local UpdateResult = require("mongorover.resultObjects.UpdateResult")
@@ -58,6 +59,26 @@ setmetatable(TestCollection, {__index = BaseTest})
 		
 		local check_result = self.collection:find_one({_id = result.inserted_id})
 		lu.assertTrue(table_eq(check_result, allDifferentTypes), "insert_one and find_one documents do not match")
+	end
+
+	function TestCollection:date_conversions()
+		local seconds_before_epoch = -99
+		local epoch = 0
+		local seconds_after_epoch = 99
+
+		local dates = {
+			before_epoch = BSONDate.new(seconds_before_epoch),
+			at_epoch = BSONDate.new(epoch),
+			after_epoch = BSONDate.new(seconds_after_epoch),
+		}
+
+		self.collection:insert_one(dates)
+		local result = self.collection:find_one({}, {_id = false})
+		lu.assertEquals(result.before_epoch.datetime, seconds_before_epoch)
+		lu.assertEquals(result.at_epoch.datetime, epoch)
+		lu.assertEquals(result.after_epoch.datetime, seconds_after_epoch)
+
+		lu.assertTrue(BSONDate.isBSONDate(result.before_epoch))
 	end
 
 	function TestCollection:test_find_one_and_insert_one_without_id()
