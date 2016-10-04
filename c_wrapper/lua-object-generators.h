@@ -37,4 +37,13 @@ bool is_BSONNull(lua_State *L,
                  int index,
                  int absolute_luaBSONObjects_index);
 
+bool generate_BSONDate(lua_State *L,
+                       int64_t datetime,
+                       int absolute_luaBSONObjects_index,
+                       bson_error_t *error);
+
+bool is_BSONDate(lua_State *L,
+                 int index,
+                 int absolute_luaBSONObjects_index);
+
 #endif //MONGO_MODULE_LUA_OBJECT_GENERATORS_H

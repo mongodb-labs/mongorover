@@ -6,10 +6,12 @@
 
 local BSONNull = require('mongorover.luaBSONObjects.BSONNull')
 local ObjectId = require('mongorover.luaBSONObjects.ObjectId')
+local BSONDate = require('mongorover.luaBSONObjects.BSONDate')
 
 local objects = {
 	BSONNull = BSONNull,
-	ObjectId = ObjectId
+	ObjectId = ObjectId,
+	BSONDate = BSONDate
 }
 
 local luaBSONObjects = setmetatable(objects, {

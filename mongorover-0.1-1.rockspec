@@ -72,6 +72,7 @@ package = "mongorover"
         ["mongorover.luaBSONObjects"] = "mongorover/luaBSONObjects.lua",
           ["mongorover.luaBSONObjects.BSONNull"] = "mongorover/luaBSONObjects/BSONNull.lua",
           ["mongorover.luaBSONObjects.ObjectId"] = "mongorover/luaBSONObjects/ObjectId.lua",
+          ["mongorover.luaBSONObjects.BSONDate"] = "mongorover/luaBSONObjects/BSONDate.lua",
         ["mongorover.resultObjects"] = "mongorover/resultObjects.lua",
           ["mongorover.resultObjects.InsertOneResult"] = "mongorover/resultObjects/InsertOneResult.lua",
           ["mongorover.resultObjects.InsertManyResult"] = "mongorover/resultObjects/InsertManyResult.lua",

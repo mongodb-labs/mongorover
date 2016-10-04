@@ -181,6 +181,21 @@ append_stack_value_to_bson_doc(lua_State *L,
                 }
             } else if (is_BSONNull(L, absolute_stack_index, absolute_luaBSONObjects_index)) {
                 bson_append_null(bson_doc, key, -1);
+            } else if (is_BSONDate(L, absolute_stack_index, absolute_luaBSONObjects_index)) {
+                int64_t seconds;
+
+                lua_getfield(L, absolute_stack_index, "datetime");
+                if ((lua_isnumber(L, -1))) {
+                    seconds = lua_tointeger(L, -1);
+                } else {
+                    luaL_error(L, "BSONDate datetime field is not an integer");
+                }
+                lua_pop(L, 1);
+
+                // Lua handles dates in seconds since Epoch
+                // BSON uses milliseconds
+                bson_append_date_time(bson_doc, key, -1, seconds * 1000);
+
             } else {
                 bson_t subdocument;
                 if (lua_table_is_array(L, absolute_stack_index)) {
@@ -669,7 +684,13 @@ _iterate_and_add_values_document_or_array_to_table(lua_State *L,
                 break;
             };
             case BSON_TYPE_DATE_TIME:
-                luaL_error(L, "BSON_TYPE_DATE_TIME not supported yet");
+                if (!(generate_BSONDate(L,
+                                        value->value.v_datetime,
+                                        absolute_luaBSONObjects_index,
+                                        error))) {
+                    return false;
+                }
+                lua_setfield(L, absolute_stack_index, key);
                 break;
             case BSON_TYPE_NULL: {
                 if (!(generate_BSONNull(L, absolute_luaBSONObjects_index, error))) {

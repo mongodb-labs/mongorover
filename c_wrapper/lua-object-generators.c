@@ -160,3 +160,75 @@ is_BSONNull(lua_State *L,
     lua_pop(L, 2);
     return ret;
 }
+
+
+/**
+ * generate_BSONDate:
+ * @L: A lua_State.
+ * @datetime: An Int.
+ * @absolute_luaBSONObjects_index: An Int.
+ * @error: A bson_error_t.
+ *
+ * Generates a BSONDate and leaves it at the top of the stack.
+ *
+ * Returns false if error occurred. Error propagated through the bson_error_t.
+ */
+bool
+generate_BSONDate(lua_State *L,
+                  int64_t datetime,
+                  int absolute_luaBSONObjects_index,
+                  bson_error_t *error)
+{
+    lua_getfield(L, absolute_luaBSONObjects_index, "BSONDate");
+
+    lua_getfield(L, -1, "new");
+    // pushnumber and not pushinteger to allow for dates greater than 1e14
+    // to be not-truncated or misfigured in some way for Lua 5.1 and 5.2
+    lua_pushnumber(L, datetime / 1000);
+
+    // Make call using 1 argument and getting 1 result
+    if (lua_pcall(L, 1, 1, 0) != 0) {
+        strncpy (error->message,
+                 lua_tostring(L, -1),
+                 sizeof(error->message));
+        lua_pop(L, 1);
+        return false;
+    }
+    // Remove variable BSONDate off of the stack to maintain stack integrity
+    lua_remove(L, -2);
+
+    return true;
+}
+
+
+/**
+ * is_BSONDate:
+ * @L: A lua_State.
+ * @index: an Int.
+ * @absolute_luaBSONObjects_index: An Int.
+ *
+ * Takes variable BSONDate and uses it to call BSONDate.isBSONDate(...)
+ * on the object at the given index on the stack.
+ *
+ * Returns false if error occurred. Error propagated through the bson_error_t.
+ */
+bool
+is_BSONDate(lua_State *L,
+            int index,
+            int absolute_luaBSONObjects_index)
+{
+    //TODO: make this error based
+    bool ret;
+    int absolute_stack_index = index > 0 ? index : lua_gettop(L) + index + 1;
+
+    lua_getfield(L, absolute_luaBSONObjects_index, "BSONDate");
+    lua_getfield(L, -1, "isBSONDate");
+    lua_pushvalue(L, absolute_stack_index);
+    if (lua_pcall(L, 1, 1, 0) != 0) {
+        luaL_error(L, "error running function `f': %s", lua_tostring(L, -1));
+    }
+
+    ret = lua_toboolean(L, -1);
+    lua_pop(L, 2);
+    return ret;
+}
