@@ -33,6 +33,9 @@ int lua_mongo_collection_delete_one(lua_State *L);
 int lua_mongo_collection_delete_many(lua_State *L);
 int lua_mongo_collection_aggregate (lua_State *L);
 int lua_mongo_collection_destroy (lua_State *L);
+int lua_mongo_collection_create_index (lua_State *L);
+int lua_mongo_collection_drop_index (lua_State *L);
+int lua_mongo_collection_find_indexes (lua_State *L);
 
 static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_drop", lua_mongo_collection_drop },
@@ -45,6 +48,9 @@ static const struct luaL_Reg lua_mongoc_collection_methods[] = {
     { "collection_delete_one", lua_mongo_collection_delete_one },
     { "collection_delete_many", lua_mongo_collection_delete_many },
     { "collection_aggregate", lua_mongo_collection_aggregate },
+    { "collection_create_index", lua_mongo_collection_create_index },
+    { "collection_drop_index", lua_mongo_collection_drop_index },
+    { "collection_find_indexes", lua_mongo_collection_find_indexes },
     { "__gc", lua_mongo_collection_destroy },
     { NULL, NULL },
 };

@@ -18,6 +18,7 @@
 #include "lua-bson.h"
 #include "lua-mongoc-collection.h"
 #include "lua-version-compat.h"
+#include <stdio.h>
 
 int
 lua_mongo_collection_new(lua_State *L)
@@ -629,3 +630,136 @@ lua_mongo_collection_destroy(lua_State *L)
     }
     return 1;
 }
+
+
+
+int lua_mongo_collection_create_index(lua_State *L)
+{
+
+	bson_iter_t iter;
+	bson_value_t *value;
+	const char *key;
+
+	bool ret=false;
+    bool throw_error=false;
+
+    collection_t *collection;
+    bson_t keys = BSON_INITIALIZER;
+	bson_t options = BSON_INITIALIZER;
+    bson_error_t error;
+
+    mongoc_index_opt_t opt;
+    mongoc_index_opt_init(&opt);
+	
+    int absolute_luaBSONObjects_index = 2;
+    int keys_index = 3;
+    int options_index = 4;
+
+    if (!(lua_istable(L, keys_index))) {
+        luaL_error(L, "keys parameter must be a table");
+    }
+
+    if (!(lua_isnil(L, keys_index))){
+		throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
+		if(throw_error){
+			goto DONE;
+		}
+    }
+
+    if (!(lua_isnil(L, options_index))){
+		throw_error = !(lua_table_to_bson(L, &options, options_index, false, absolute_luaBSONObjects_index, &error ));
+		if(throw_error){
+			goto DONE;
+		}
+    }
+
+    collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+	if (&options && bson_iter_init (&iter, &options)) {
+		while (bson_iter_next (&iter)) {
+			value=bson_iter_value(&iter);
+			key=bson_iter_key(&iter);
+			if( strcmp(key, "unique") == 0 ){
+				opt.unique=value->value.v_bool;
+			}else if( strcmp(key, "background") == 0 ){
+				opt.background=value->value.v_bool;
+			}else if( strcmp(key, "name") == 0 ){
+				char tmp[100];
+				sprintf( tmp, "%s", value->value.v_utf8);
+				opt.name=tmp;
+			}else if( strcmp(key, "expireAfterSeconds") == 0 ){
+				opt.expire_after_seconds=value->value.v_int32;
+			}else if( strcmp(key, "sparse") == 0 ){
+				opt.sparse=value->value.v_bool;
+			}
+		}	
+	}
+
+	ret=mongoc_collection_create_index_with_opts(collection->c_collection, &keys, &opt, NULL, NULL, &error);
+    lua_pushboolean(L, ret);
+    if(!ret){
+		throw_error=true;
+		goto DONE;
+    }
+
+DONE:
+    bson_destroy(&keys);
+    bson_destroy(&options);
+    if(throw_error){
+		luaL_error(L, error.message);
+    }
+    return 1;
+}
+
+
+int lua_mongo_collection_drop_index(lua_State *L)
+{
+	bool ret=false;
+    bool throw_error=false;
+
+    collection_t *collection;
+    bson_error_t error;
+
+    const char *index_name;
+    int absolute_luaBSONObjects_index = 2;
+    int index_name_index = 3;
+
+    index_name = luaL_checkstring(L, index_name_index);
+    collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+	ret=mongoc_collection_drop_index_with_opts(collection->c_collection, index_name, NULL, &error);
+    lua_pushboolean(L, ret);
+
+    if(!ret){
+		throw_error=true;
+		goto DONE;
+    }
+
+DONE:
+    if(throw_error){
+		luaL_error(L, error.message);
+    }
+    return 1;
+}
+
+
+int
+lua_mongo_collection_find_indexes(lua_State *L)
+{
+    collection_t *collection;
+    mongoc_cursor_t *cursor = NULL;
+    bson_error_t error;
+
+    collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+
+    cursor = mongoc_collection_find_indexes(collection->c_collection, &error);
+    lua_mongo_cursor_new(L, cursor);
+
+    if(error.code != 0){
+		luaL_error(L, error.message);
+    }
+
+    return 1;
+}
+
+
