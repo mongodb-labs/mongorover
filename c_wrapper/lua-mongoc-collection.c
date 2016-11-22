@@ -18,7 +18,6 @@
 #include "lua-bson.h"
 #include "lua-mongoc-collection.h"
 #include "lua-version-compat.h"
-#include <stdio.h>
 
 int
 lua_mongo_collection_new(lua_State *L)
@@ -684,9 +683,9 @@ int lua_mongo_collection_create_index(lua_State *L)
 			}else if( strcmp(key, "background") == 0 ){
 				opt.background=value->value.v_bool;
 			}else if( strcmp(key, "name") == 0 ){
-				char tmp[100];
-				sprintf( tmp, "%s", value->value.v_utf8);
-				opt.name=tmp;
+				int len=value->value.v_utf8.len;
+				opt.name=(char *) malloc(len);
+				strcpy(opt.name, value->value.v_utf8.str);
 			}else if( strcmp(key, "expireAfterSeconds") == 0 ){
 				opt.expire_after_seconds=value->value.v_int32;
 			}else if( strcmp(key, "sparse") == 0 ){
