@@ -8,7 +8,7 @@ local sample = {
 	{name = "orange", txt='Color between red and yellow', cost = 11},
 	{name = "grape", txt='Fruiting berry', cost = 3},
 	{name = "mango berry", txt='Juicy stone fruit', cost = 25},
-	{name = "grape", txt='Duplicate Fruiting berry', cost = 3},
+	{name = "grape", txt='Duplicate Fruiting berry', cost = 4},
 	{name = "banana", txt='Edible berry of flowering plants', cost = 1.5},
 	{name = "persimmon", txt='Edible fruit of trees', cost = 4.1},
 }
@@ -60,6 +60,20 @@ for key in res do
 		print(k,v)
 	end
 end
+print('\nRemoving index.')
+print( col:dropIndex('myindex') )
+
+
+print('\nCreating compound mixed index.')
+local res=col:createIndex( {name='text', cost=1}, {name='myindex', unique=false, background=false} ); --Test compound index
+print(tostring(res))
+print('\nCompound text search results.')
+local res= col:find({ ['$and']={{cost=4, ['$text']={['$search']='grape'} } } })
+for key in res do
+	for k,v in pairs(key) do
+		print(k,v)
+	end
+end
 
 
 print('\nRetrieving existing indexes.')
@@ -79,4 +93,3 @@ print( col:dropIndex('myindex') )
 
 print('\nRemoving data.')
 col:drop()
-
