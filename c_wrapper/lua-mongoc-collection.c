@@ -635,7 +635,6 @@ lua_mongo_collection_destroy(lua_State *L)
 int
 lua_mongo_collection_create_index(lua_State *L)
 {
-    char* ret;
     bool throw_error = false;
     bool created = false;
 
@@ -721,8 +720,7 @@ lua_mongo_collection_create_index(lua_State *L)
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
     created=mongoc_collection_create_index_with_opts(collection->c_collection, &keys, &opt, NULL, NULL, &error);
 
-    ret = opt.name;
-    lua_pushstring(L, ret);
+    lua_pushstring(L, opt.name); //Return an index name
     if(!created){
         throw_error = true;
         goto DONE;
