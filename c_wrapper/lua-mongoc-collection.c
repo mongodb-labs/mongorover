@@ -673,19 +673,13 @@ lua_mongo_collection_create_index(lua_State *L)
         lua_getfield(L, options_index, "weights"); //Table
 
         if( lua_isstring(L, -9) ){
-            char *name = lua_tostring(L, -9);
-            opt.name = (char *) malloc( strlen(name)+1 );
-            strcpy(opt.name, name);
+            opt.name = lua_tostring(L, -9);
         }
         if( lua_isstring(L, -8) ){
-            char *deflan = lua_tostring(L, -8);
-            opt.default_language = (char *) malloc( strlen(deflan)+1 );
-            strcpy(opt.default_language, deflan);
+            opt.default_language = lua_tostring(L, -8);
         }
         if( lua_isstring(L, -7) ){
-            char *lanover = lua_tostring(L, -7);
-            opt.language_override = (char *) malloc( strlen(lanover)+1 );
-            strcpy(opt.language_override, lanover);
+            opt.language_override = lua_tostring(L, -7);
         }
         if( lua_isboolean(L, -6) ){
             bool unique = lua_toboolean(L, -6);
