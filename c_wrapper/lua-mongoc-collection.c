@@ -636,8 +636,8 @@ int
 lua_mongo_collection_create_index(lua_State *L)
 {
     char* ret;
-    bool throw_error=false;
-    bool created=false;
+    bool throw_error = false;
+    bool created = false;
 
     collection_t *collection;
     bson_t keys = BSON_INITIALIZER;
