@@ -270,7 +270,7 @@ local MongoCollection = {__mode="k"}
 	-- Example usage at @{indexing.lua}.
 	-- @tparam table of fields and their corresponding index types
 	-- @tparam table of options to be used when creating index
-	-- @return a boolean true if index created successfully
+	-- @return string index name on success
 	function MongoCollection:createIndex(keys,opt)
 	    return self.collection_t:collection_create_index(luaBSONObjects, keys, opt)
 	end
