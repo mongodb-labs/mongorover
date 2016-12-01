@@ -632,24 +632,21 @@ lua_mongo_collection_destroy(lua_State *L)
 
 
 
-int lua_mongo_collection_create_index(lua_State *L)
+int
+lua_mongo_collection_create_index(lua_State *L)
 {
-
-	bson_iter_t iter;
-	bson_value_t *value;
-	const char *key;
-
-	bool ret=false;
+    char* ret;
     bool throw_error=false;
+    bool created=false;
 
     collection_t *collection;
     bson_t keys = BSON_INITIALIZER;
-	bson_t options = BSON_INITIALIZER;
+    bson_t weights = BSON_INITIALIZER;
     bson_error_t error;
 
     mongoc_index_opt_t opt;
     mongoc_index_opt_init(&opt);
-	
+    
     int absolute_luaBSONObjects_index = 2;
     int keys_index = 3;
     int options_index = 4;
@@ -659,62 +656,93 @@ int lua_mongo_collection_create_index(lua_State *L)
     }
 
     if (!(lua_isnil(L, keys_index))){
-		throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
-		if(throw_error){
-			goto DONE;
-		}
+        throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
+        if(throw_error){
+            goto DONE;
+        }
     }
 
-    if (!(lua_isnil(L, options_index))){
-		throw_error = !(lua_table_to_bson(L, &options, options_index, false, absolute_luaBSONObjects_index, &error ));
-		if(throw_error){
-			goto DONE;
-		}
+    if ( lua_istable(L, options_index) ){
+        lua_getfield(L, options_index, "name"); //String
+        lua_getfield(L, options_index, "default_language"); //String
+        lua_getfield(L, options_index, "language_override"); //String
+        lua_getfield(L, options_index, "unique"); //Boolean
+        lua_getfield(L, options_index, "sparse"); //Boolean
+        lua_getfield(L, options_index, "background"); //Boolean
+        lua_getfield(L, options_index, "expireAfterSeconds"); //Integer
+        lua_getfield(L, options_index, "textIndexVersion"); //Integer
+        lua_getfield(L, options_index, "weights"); //Table
+
+        if( lua_isstring(L, -9) ){
+            char *name = lua_tostring(L, -9);
+            opt.name = (char *) malloc( strlen(name)+1 );
+            strcpy(opt.name, name);
+        }
+        if( lua_isstring(L, -8) ){
+            char *deflan = lua_tostring(L, -8);
+            opt.default_language = (char *) malloc( strlen(deflan)+1 );
+            strcpy(opt.default_language, deflan);
+        }
+        if( lua_isstring(L, -7) ){
+            char *lanover = lua_tostring(L, -7);
+            opt.language_override = (char *) malloc( strlen(lanover)+1 );
+            strcpy(opt.language_override, lanover);
+        }
+        if( lua_isboolean(L, -6) ){
+            bool unique = lua_toboolean(L, -6);
+            opt.unique = unique;
+        }
+        if( lua_isboolean(L, -5) ){
+            bool sparse = lua_toboolean(L, -5);
+            opt.sparse = sparse;
+        }
+        if( lua_isboolean(L, -4) ){
+            bool background = lua_toboolean(L, -4);
+            opt.background = background;
+        }
+        if( lua_isinteger(L, -3) ){
+            int expire = lua_tointeger(L, -3);
+            opt.expire_after_seconds = expire;
+        }
+        if( lua_isinteger(L, -2) ){
+            int version = lua_tointeger(L, -2);
+            opt.v = version;
+        }
+        if( lua_istable(L, -1) ){
+            throw_error = !(lua_table_to_bson(L, &weights, -1, false, absolute_luaBSONObjects_index, &error ));
+            if(throw_error){
+                goto DONE;
+            }
+            opt.weights = &weights;
+        }
+        lua_pop(L, 9);
     }
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
+    created=mongoc_collection_create_index_with_opts(collection->c_collection, &keys, &opt, NULL, NULL, &error);
 
-	if (&options && bson_iter_init (&iter, &options)) {
-		while (bson_iter_next (&iter)) {
-			value=bson_iter_value(&iter);
-			key=bson_iter_key(&iter);
-			if( strcmp(key, "unique") == 0 ){
-				opt.unique=value->value.v_bool;
-			}else if( strcmp(key, "background") == 0 ){
-				opt.background=value->value.v_bool;
-			}else if( strcmp(key, "name") == 0 ){
-				int len=value->value.v_utf8.len;
-				opt.name=(char *) malloc(len);
-				strcpy(opt.name, value->value.v_utf8.str);
-			}else if( strcmp(key, "expireAfterSeconds") == 0 ){
-				opt.expire_after_seconds=value->value.v_int32;
-			}else if( strcmp(key, "sparse") == 0 ){
-				opt.sparse=value->value.v_bool;
-			}
-		}	
-	}
-
-	ret=mongoc_collection_create_index_with_opts(collection->c_collection, &keys, &opt, NULL, NULL, &error);
-    lua_pushboolean(L, ret);
-    if(!ret){
-		throw_error=true;
-		goto DONE;
+    ret = opt.name;
+    lua_pushstring(L, ret);
+    if(!created){
+        throw_error = true;
+        goto DONE;
     }
 
 DONE:
     bson_destroy(&keys);
-    bson_destroy(&options);
+    bson_destroy(&weights);
     if(throw_error){
-		luaL_error(L, error.message);
+        luaL_error(L, error.message);
     }
     return 1;
 }
 
 
-int lua_mongo_collection_drop_index(lua_State *L)
+int 
+lua_mongo_collection_drop_index(lua_State *L)
 {
-	bool ret=false;
-    bool throw_error=false;
+    bool ret = false;
+    bool throw_error = false;
 
     collection_t *collection;
     bson_error_t error;
@@ -726,17 +754,17 @@ int lua_mongo_collection_drop_index(lua_State *L)
     index_name = luaL_checkstring(L, index_name_index);
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
-	ret=mongoc_collection_drop_index_with_opts(collection->c_collection, index_name, NULL, &error);
+    ret = mongoc_collection_drop_index_with_opts(collection->c_collection, index_name, NULL, &error);
     lua_pushboolean(L, ret);
 
     if(!ret){
-		throw_error=true;
-		goto DONE;
+        throw_error = true;
+        goto DONE;
     }
 
 DONE:
     if(throw_error){
-		luaL_error(L, error.message);
+        luaL_error(L, error.message);
     }
     return 1;
 }
@@ -755,10 +783,9 @@ lua_mongo_collection_find_indexes(lua_State *L)
     lua_mongo_cursor_new(L, cursor);
 
     if(error.code != 0){
-		luaL_error(L, error.message);
+        luaL_error(L, error.message);
     }
 
     return 1;
 }
-
 
