@@ -682,24 +682,19 @@ lua_mongo_collection_create_index(lua_State *L)
             opt.language_override = lua_tostring(L, -7);
         }
         if( lua_isboolean(L, -6) ){
-            bool unique = lua_toboolean(L, -6);
-            opt.unique = unique;
+            opt.unique = lua_toboolean(L, -6);
         }
         if( lua_isboolean(L, -5) ){
-            bool sparse = lua_toboolean(L, -5);
-            opt.sparse = sparse;
+            opt.sparse = lua_toboolean(L, -5);
         }
         if( lua_isboolean(L, -4) ){
-            bool background = lua_toboolean(L, -4);
-            opt.background = background;
+            opt.background = lua_toboolean(L, -4);
         }
         if( lua_isinteger(L, -3) ){
-            int expire = lua_tointeger(L, -3);
-            opt.expire_after_seconds = expire;
+            opt.expire_after_seconds = lua_tointeger(L, -3);
         }
         if( lua_isinteger(L, -2) ){
-            int version = lua_tointeger(L, -2);
-            opt.v = version;
+            opt.v = lua_tointeger(L, -2);
         }
         if( lua_istable(L, -1) ){
             throw_error = !(lua_table_to_bson(L, &weights, -1, false, absolute_luaBSONObjects_index, &error ));
