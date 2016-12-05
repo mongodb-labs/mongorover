@@ -661,7 +661,7 @@ lua_mongo_collection_create_index(lua_State *L)
         }
     }
 
-    if ( lua_istable(L, options_index) ){
+    if (lua_istable(L, options_index) ){
         lua_getfield(L, options_index, "name"); //String
         lua_getfield(L, options_index, "default_language"); //String
         lua_getfield(L, options_index, "language_override"); //String
@@ -690,11 +690,11 @@ lua_mongo_collection_create_index(lua_State *L)
         if( lua_isboolean(L, -4) ){
             opt.background = lua_toboolean(L, -4);
         }
-        if( lua_isinteger(L, -3) ){
-            opt.expire_after_seconds = lua_tointeger(L, -3);
+        if( lua_isinteger_compat(L, -3) ){
+            opt.expire_after_seconds = lua_tointeger_compat(L, -3);
         }
-        if( lua_isinteger(L, -2) ){
-            opt.v = lua_tointeger(L, -2);
+        if( lua_isinteger_compat(L, -2) ){
+            opt.v = lua_tointeger_compat(L, -2);
         }
         if( lua_istable(L, -1) ){
             throw_error = !(lua_table_to_bson(L, &weights, -1, false, absolute_luaBSONObjects_index, &error ));
