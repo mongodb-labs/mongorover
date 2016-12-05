@@ -707,7 +707,7 @@ lua_mongo_collection_create_index(lua_State *L)
     }
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
-    created=mongoc_collection_create_index_with_opts(collection->c_collection, &keys, &opt, NULL, NULL, &error);
+    created = mongoc_collection_create_index(collection->c_collection, &keys, &opt, &error);
 
     lua_pushstring(L, opt.name); //Return an index name
     if(!created){
@@ -741,7 +741,7 @@ lua_mongo_collection_drop_index(lua_State *L)
     index_name = luaL_checkstring(L, index_name_index);
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
-    ret = mongoc_collection_drop_index_with_opts(collection->c_collection, index_name, NULL, &error);
+    ret = mongoc_collection_drop_index(collection->c_collection, index_name, &error);
     lua_pushboolean(L, ret);
 
     if(!ret){
