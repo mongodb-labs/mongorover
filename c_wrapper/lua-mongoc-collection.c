@@ -631,13 +631,13 @@ lua_mongo_collection_destroy(lua_State *L)
 }
 
 
-
 int
 lua_mongo_collection_create_index(lua_State *L)
 {
     bool throw_error = false;
     bool created = false;
 
+    char *index_name;
     collection_t *collection;
     bson_t keys = BSON_INITIALIZER;
     bson_t weights = BSON_INITIALIZER;
@@ -650,53 +650,54 @@ lua_mongo_collection_create_index(lua_State *L)
     int keys_index = 3;
     int options_index = 4;
 
-    if (!(lua_istable(L, keys_index))) {
+    if(!(lua_istable(L, keys_index))){
         luaL_error(L, "keys parameter must be a table");
-    }
-
-    if (!(lua_isnil(L, keys_index))){
+    }else{
         throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
         if(throw_error){
             goto DONE;
         }
+        index_name = mongoc_collection_keys_to_index_string(&keys);
+        opt.name = index_name;
     }
 
-    if (lua_istable(L, options_index) ){
-        lua_getfield(L, options_index, "name"); //String
-        lua_getfield(L, options_index, "default_language"); //String
-        lua_getfield(L, options_index, "language_override"); //String
-        lua_getfield(L, options_index, "unique"); //Boolean
-        lua_getfield(L, options_index, "sparse"); //Boolean
-        lua_getfield(L, options_index, "background"); //Boolean
-        lua_getfield(L, options_index, "expireAfterSeconds"); //Integer
-        lua_getfield(L, options_index, "textIndexVersion"); //Integer
-        lua_getfield(L, options_index, "weights"); //Table
+    if(lua_istable(L, options_index)){
+        lua_getfield(L, options_index, "name");
+        lua_getfield(L, options_index, "default_language");
+        lua_getfield(L, options_index, "language_override");
+        lua_getfield(L, options_index, "unique");
+        lua_getfield(L, options_index, "sparse");
+        lua_getfield(L, options_index, "background");
+        lua_getfield(L, options_index, "expireAfterSeconds");
+        lua_getfield(L, options_index, "textIndexVersion");
+        lua_getfield(L, options_index, "weights");
 
-        if( lua_isstring(L, -9) ){
+        if(lua_isstring(L, -9)){
             opt.name = lua_tostring(L, -9);
+            index_name = opt.name;
         }
-        if( lua_isstring(L, -8) ){
+        if(lua_isstring(L, -8)){
             opt.default_language = lua_tostring(L, -8);
         }
-        if( lua_isstring(L, -7) ){
+        if(lua_isstring(L, -7)){
             opt.language_override = lua_tostring(L, -7);
         }
-        if( lua_isboolean(L, -6) ){
+        if(lua_isboolean(L, -6)){
             opt.unique = lua_toboolean(L, -6);
         }
-        if( lua_isboolean(L, -5) ){
+        if(lua_isboolean(L, -5)){
             opt.sparse = lua_toboolean(L, -5);
         }
-        if( lua_isboolean(L, -4) ){
+        if(lua_isboolean(L, -4)){
             opt.background = lua_toboolean(L, -4);
         }
-        if( lua_isinteger_compat(L, -3) ){
+        if(lua_isinteger_compat(L, -3)){
             opt.expire_after_seconds = lua_tointeger_compat(L, -3);
         }
-        if( lua_isinteger_compat(L, -2) ){
+        if(lua_isinteger_compat(L, -2)){
             opt.v = lua_tointeger_compat(L, -2);
         }
-        if( lua_istable(L, -1) ){
+        if(lua_istable(L, -1)){
             throw_error = !(lua_table_to_bson(L, &weights, -1, false, absolute_luaBSONObjects_index, &error ));
             if(throw_error){
                 goto DONE;
@@ -709,7 +710,7 @@ lua_mongo_collection_create_index(lua_State *L)
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
     created = mongoc_collection_create_index(collection->c_collection, &keys, &opt, &error);
 
-    lua_pushstring(L, opt.name); //Return an index name
+    lua_pushstring(L, index_name);
     if(!created){
         throw_error = true;
         goto DONE;
@@ -731,14 +732,23 @@ lua_mongo_collection_drop_index(lua_State *L)
     bool ret = false;
     bool throw_error = false;
 
+    bson_t keys = BSON_INITIALIZER;
     collection_t *collection;
     bson_error_t error;
 
-    const char *index_name;
+    char *index_name;
     int absolute_luaBSONObjects_index = 2;
     int index_name_index = 3;
 
-    index_name = luaL_checkstring(L, index_name_index);
+    if(lua_isstring(L, index_name_index)){
+        index_name = luaL_checkstring(L, index_name_index);
+    }else if(lua_istable(L, index_name_index)){
+        throw_error = !(lua_table_to_bson(L, &keys, index_name_index, false, absolute_luaBSONObjects_index, &error ));
+        if(throw_error){
+            goto DONE;
+        }
+        index_name = mongoc_collection_keys_to_index_string(&keys);
+    }
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     ret = mongoc_collection_drop_index(collection->c_collection, index_name, &error);
@@ -750,6 +760,7 @@ lua_mongo_collection_drop_index(lua_State *L)
     }
 
 DONE:
+    bson_destroy(&keys);
     if(throw_error){
         luaL_error(L, error.message);
     }
@@ -769,10 +780,8 @@ lua_mongo_collection_find_indexes(lua_State *L)
     cursor = mongoc_collection_find_indexes(collection->c_collection, &error);
     lua_mongo_cursor_new(L, cursor);
 
-    if(error.code != 0){
+    if(error.code){
         luaL_error(L, error.message);
     }
-
     return 1;
 }
-
