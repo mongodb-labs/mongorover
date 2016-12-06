@@ -268,18 +268,18 @@ local MongoCollection = {__mode="k"}
 	---
 	-- Create an index on any field or combination of fields in the collection.
 	-- Example usage at @{indexing.lua}.
-	-- @tparam table of fields and their corresponding index types
-	-- @tparam table of options to be used when creating index
-	-- @return string index name on success
-	function MongoCollection:createIndex(keys,opt)
-	    return self.collection_t:collection_create_index(luaBSONObjects, keys, opt)
+	-- @tparam table keys containing fields and their corresponding index types
+	-- @tparam table options to be used when creating index
+	-- @return string index name
+	function MongoCollection:createIndex(keys,options)
+	    return self.collection_t:collection_create_index(luaBSONObjects, keys, options)
 	end
 
 	---
 	-- Delete an index for a specified collection.
 	-- Example usage at @{indexing.lua}.
-	-- @tparam string an index name to be deleted
-	-- @return a boolean true if index deleted successfully
+	-- @param index string name or original table with indexed fields and their corresponding types
+	-- @return a nil value on success or throws an error
 	function MongoCollection:dropIndex(index)
 	    return self.collection_t:collection_drop_index(luaBSONObjects, index)
 	end
@@ -289,7 +289,8 @@ local MongoCollection = {__mode="k"}
 	-- Example usage at @{indexing.lua}.
 	-- @return A @{MongoCursor} with results.
 	function MongoCollection:findIndexes()
-	    return self.collection_t:collection_find_indexes(luaBSONObjects)
+		local cursor_t = self.collection_t:collection_find_indexes(luaBSONObjects)
+		return MongoCursor(self, cursor_t)
 	end
 
 
