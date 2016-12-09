@@ -268,24 +268,28 @@ local MongoCollection = {__mode="k"}
 	---
 	-- Create an index on any field or combination of fields in the collection.
 	-- Example usage at @{indexing.lua}.
-	-- @tparam table keys containing fields and their corresponding index types
-	-- @tparam table options to be used when creating index
-	-- @return string index name
-	function MongoCollection:createIndex(keys,options)
+	-- @tparam table keys A table where the key is the field and value is the
+	-- corresponding index type.
+	-- @tparam table options Options for the index (e.g. name, unique, etc.).
+  -- See the MongoDB documentation for a full list of supported options by
+	-- server version.
+	-- @treturn string index name
+	function MongoCollection:createIndex(keys, options)
 	    return self.collection_t:collection_create_index(luaBSONObjects, keys, options)
 	end
 
 	---
-	-- Delete an index for a specified collection.
+	-- Drops the specified index on this collection. Raises an error if
+	-- unsuccessful.
 	-- Example usage at @{indexing.lua}.
-	-- @param index string name or original table with indexed fields and their corresponding types
-	-- @return a nil value on success or throws an error
+	-- @param index string name or original table with indexed fields and their
+	-- corresponding types.
 	function MongoCollection:dropIndex(index)
 	    return self.collection_t:collection_drop_index(luaBSONObjects, index)
 	end
 
 	---
-	-- Retrieve an index for this collection
+	-- Get a cursor over the index documents for this collection.
 	-- Example usage at @{indexing.lua}.
 	-- @return A @{MongoCursor} with results.
 	function MongoCollection:findIndexes()
