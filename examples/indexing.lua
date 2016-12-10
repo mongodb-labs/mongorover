@@ -42,7 +42,7 @@ printResult(res)
 print('\nRetrieving index: ')
 printResult(col:findIndexes(index))
 
-print('\nRemoving index: ' .. tostring(col:dropIndex(index)))
+print('\nRemoving index: ' .. tostring(col:dropIndex(index)==nil))
 
 print('\nRemoving data.')
 col:drop()
