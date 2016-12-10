@@ -635,9 +635,8 @@ int
 lua_mongo_collection_create_index(lua_State *L)
 {
     bool throw_error = false;
-    bool created = false;
+    bool used_default_index_name = false;
 
-    char *index_name;
     collection_t *collection;
     bson_t keys = BSON_INITIALIZER;
     bson_t weights = BSON_INITIALIZER;
@@ -650,15 +649,13 @@ lua_mongo_collection_create_index(lua_State *L)
     int keys_index = 3;
     int options_index = 4;
 
-    if(!(lua_istable(L, keys_index))){
-        luaL_error(L, "keys parameter must be a table");
-    }else{
+    if(lua_istable(L, keys_index)){
         throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
         if(throw_error){
             goto DONE;
         }
-        index_name = mongoc_collection_keys_to_index_string(&keys);
-        opt.name = index_name;
+    } else {
+        luaL_error(L, "keys parameter must be a table");
     }
 
     if(lua_istable(L, options_index)){
@@ -672,9 +669,11 @@ lua_mongo_collection_create_index(lua_State *L)
         lua_getfield(L, options_index, "textIndexVersion");
         lua_getfield(L, options_index, "weights");
 
-        if(lua_isstring(L, -9)){
+        used_default_index_name = !lua_isstring(L, -9);
+        if(used_default_index_name){
+            opt.name = mongoc_collection_keys_to_index_string(&keys);
+        } else {
             opt.name = lua_tostring(L, -9);
-            index_name = opt.name;
         }
         if(lua_isstring(L, -8)){
             opt.default_language = lua_tostring(L, -8);
@@ -708,17 +707,15 @@ lua_mongo_collection_create_index(lua_State *L)
     }
 
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
-    created = mongoc_collection_create_index(collection->c_collection, &keys, &opt, &error);
-
-    lua_pushstring(L, index_name);
-    if(!created){
-        throw_error = true;
-        goto DONE;
-    }
+    throw_error = !(mongoc_collection_create_index(collection->c_collection, &keys, &opt, &error));
+    lua_pushstring(L, opt.name);
 
 DONE:
     bson_destroy(&keys);
     bson_destroy(&weights);
+    if(used_default_index_name){
+        bson_free(opt.name);
+    }
     if(throw_error){
         luaL_error(L, error.message);
     }
@@ -729,8 +726,8 @@ DONE:
 int 
 lua_mongo_collection_drop_index(lua_State *L)
 {
-    bool ret = false;
     bool throw_error = false;
+    bool used_default_index_name = false;
 
     bson_t keys = BSON_INITIALIZER;
     collection_t *collection;
@@ -748,23 +745,21 @@ lua_mongo_collection_drop_index(lua_State *L)
             goto DONE;
         }
         index_name = mongoc_collection_keys_to_index_string(&keys);
+        used_default_index_name = true;
     }
+
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
-
-    ret = mongoc_collection_drop_index(collection->c_collection, index_name, &error);
-    lua_pushnil(L);
-
-    if(!ret){
-        throw_error = true;
-        goto DONE;
-    }
+    throw_error = !(mongoc_collection_drop_index(collection->c_collection, index_name, &error));
 
 DONE:
     bson_destroy(&keys);
+    if(used_default_index_name){
+        bson_free(index_name);
+    }
     if(throw_error){
         luaL_error(L, error.message);
     }
-    return 1;
+    return 0;
 }
 
 
