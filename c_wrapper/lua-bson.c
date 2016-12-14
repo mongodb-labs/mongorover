@@ -80,6 +80,7 @@ lua_array_length(lua_State *L,
 {
 
     int num_keys;
+    int arr_index;
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
 
     lua_pushnil(L);
@@ -89,9 +90,9 @@ lua_array_length(lua_State *L,
             lua_pop(L, 2);
             return false;
         }
-        int index = lua_tonumber(L, -2);
+        arr_index = lua_tonumber(L, -2);
         lua_pop(L, 1);
-        if (index != num_keys + 1) {
+        if (arr_index != num_keys + 1) {
             return -1;
         }
     }
@@ -400,6 +401,7 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
     int absolute_stack_index = _convert_to_absolute_stack_index(L, index);
     bool is_array;
     int number_key;
+    char buffer[100];
 
     if (!lua_istable(L, absolute_stack_index)) {
         bson_snprintf(error->message, sizeof(error->message),
@@ -451,8 +453,7 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
                         number_key--;
                     }
 
-                    char buffer[100];
-                    sprintf(buffer, "%d", (int) number_key);
+                    sprintf(buffer, "%d", number_key);
                     key = buffer;
                 }
 
@@ -489,23 +490,23 @@ _add_lua_table_contents_to_bson_doc(lua_State *L,
 
 
 /**
- * bson_is_array:
+ * exhaustively_check_bson_is_array:
  * @L: A lua_State.
- * @iter: A bson_iter_t.
+ * @iter: A bson_iter_t *.
  *
- * Takes in bson_iter_t pointing at the head of a document and traverses it's
+ * Takes in bson_iter_t * pointing at the head of a document and traverses it's
  * keys to determine whether the bson object is an array or a document.
  * Returns true if it is an array, returns false if it is not.
  */
 
 bool
-bson_is_array(bson_iter_t iter)
+exhaustively_check_bson_is_array(bson_iter_t *iter)
 {
     int i;
     char *end;
     long ret;
-    for (i = 0; bson_iter_next(&iter); i++) {
-        const char *key = bson_iter_key(&iter);
+    for (i = 0; bson_iter_next(iter); i++) {
+        const char *key = bson_iter_key(iter);
         ret = strtol(key, &end, 10);
         if (ret != i || *end) {
             return false;
@@ -544,8 +545,10 @@ bson_subdocument_or_subarray_to_table(lua_State *L,
     lua_newtable (L);
 
     if (bson_iter_recurse(iter, &child)) {
-        is_array = bson_is_array(child);
+        is_array = exhaustively_check_bson_is_array(&child);
 
+        // reset the child iterator since it was exhausted
+        bson_iter_recurse(iter, &child);
         if (!(_iterate_and_add_values_document_or_array_to_table(L, -1, bson_doc,
                                                                  &child, !is_array,
                                                                  absolute_luaBSONObjects_index, error)))
