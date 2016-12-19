@@ -649,16 +649,16 @@ lua_mongo_collection_create_index(lua_State *L)
     int keys_index = 3;
     int options_index = 4;
 
-    if(lua_istable(L, keys_index)){
+    if (lua_istable(L, keys_index)) {
         throw_error = !(lua_table_to_bson(L, &keys, keys_index, false, absolute_luaBSONObjects_index, &error ));
-        if(throw_error){
+        if (throw_error) {
             goto DONE;
         }
     } else {
         luaL_error(L, "keys parameter must be a table");
     }
 
-    if(lua_istable(L, options_index)){
+    if (lua_istable(L, options_index)) {
         lua_getfield(L, options_index, "name");
         lua_getfield(L, options_index, "default_language");
         lua_getfield(L, options_index, "language_override");
@@ -670,35 +670,35 @@ lua_mongo_collection_create_index(lua_State *L)
         lua_getfield(L, options_index, "weights");
 
         used_default_index_name = !lua_isstring(L, -9);
-        if(used_default_index_name){
+        if (used_default_index_name) {
             opt.name = mongoc_collection_keys_to_index_string(&keys);
         } else {
             opt.name = lua_tostring(L, -9);
         }
-        if(lua_isstring(L, -8)){
+        if (lua_isstring(L, -8)) {
             opt.default_language = lua_tostring(L, -8);
         }
-        if(lua_isstring(L, -7)){
+        if (lua_isstring(L, -7)) {
             opt.language_override = lua_tostring(L, -7);
         }
-        if(lua_isboolean(L, -6)){
+        if (lua_isboolean(L, -6)) {
             opt.unique = lua_toboolean(L, -6);
         }
-        if(lua_isboolean(L, -5)){
+        if (lua_isboolean(L, -5)) {
             opt.sparse = lua_toboolean(L, -5);
         }
-        if(lua_isboolean(L, -4)){
+        if (lua_isboolean(L, -4)) {
             opt.background = lua_toboolean(L, -4);
         }
-        if(lua_isinteger_compat(L, -3)){
+        if (lua_isinteger_compat(L, -3)) {
             opt.expire_after_seconds = lua_tointeger_compat(L, -3);
         }
-        if(lua_isinteger_compat(L, -2)){
+        if (lua_isinteger_compat(L, -2)) {
             opt.v = lua_tointeger_compat(L, -2);
         }
-        if(lua_istable(L, -1)){
+        if (lua_istable(L, -1)) {
             throw_error = !(lua_table_to_bson(L, &weights, -1, false, absolute_luaBSONObjects_index, &error ));
-            if(throw_error){
+            if (throw_error) {
                 goto DONE;
             }
             opt.weights = &weights;
@@ -713,10 +713,10 @@ lua_mongo_collection_create_index(lua_State *L)
 DONE:
     bson_destroy(&keys);
     bson_destroy(&weights);
-    if(used_default_index_name){
+    if (used_default_index_name) {
         bson_free(opt.name);
     }
-    if(throw_error){
+    if (throw_error) {
         luaL_error(L, error.message);
     }
     return 1;
@@ -737,11 +737,11 @@ lua_mongo_collection_drop_index(lua_State *L)
     int absolute_luaBSONObjects_index = 2;
     int index_name_index = 3;
 
-    if(lua_isstring(L, index_name_index)){
+    if (lua_isstring(L, index_name_index)) {
         index_name = luaL_checkstring(L, index_name_index);
-    }else if(lua_istable(L, index_name_index)){
+    }else if (lua_istable(L, index_name_index)) {
         throw_error = !(lua_table_to_bson(L, &keys, index_name_index, false, absolute_luaBSONObjects_index, &error ));
-        if(throw_error){
+        if (throw_error) {
             goto DONE;
         }
         index_name = mongoc_collection_keys_to_index_string(&keys);
@@ -753,10 +753,10 @@ lua_mongo_collection_drop_index(lua_State *L)
 
 DONE:
     bson_destroy(&keys);
-    if(used_default_index_name){
+    if (used_default_index_name) {
         bson_free(index_name);
     }
-    if(throw_error){
+    if (throw_error) {
         luaL_error(L, error.message);
     }
     return 0;
@@ -775,7 +775,7 @@ lua_mongo_collection_find_indexes(lua_State *L)
     cursor = mongoc_collection_find_indexes(collection->c_collection, &error);
     lua_mongo_cursor_new(L, cursor);
 
-    if(error.code){
+    if (error.code) {
         luaL_error(L, error.message);
     }
     return 1;
