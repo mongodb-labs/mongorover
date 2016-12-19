@@ -773,10 +773,14 @@ lua_mongo_collection_find_indexes(lua_State *L)
     collection = (collection_t *) luaL_checkudata(L, 1, "lua_mongoc_collection");
 
     cursor = mongoc_collection_find_indexes(collection->c_collection, &error);
-    lua_mongo_cursor_new(L, cursor);
 
-    if (error.code) {
+    if (mongoc_cursor_error(cursor, &error)) {
+        if (cursor) {
+            mongoc_cursor_destroy(cursor);
+        }
         luaL_error(L, error.message);
     }
+
+    lua_mongo_cursor_new(L, cursor);
     return 1;
 }
