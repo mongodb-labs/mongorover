@@ -22,7 +22,7 @@ print('\nInserting sample data:')
 col:insert_many(sample)
 printResult(col:find({}))
 
-local index = col:createIndex({name = 'text', txt = 'text'}, { 
+local index = col:create_index({name = 'text', txt = 'text'}, { 
 	name = 'myindex', 
 	default_language = 'english', 
 	language_override = 'lang', 
@@ -30,7 +30,7 @@ local index = col:createIndex({name = 'text', txt = 'text'}, {
 	sparse = true, 
 	background = true, 
 	expireAfterSeconds = 100, 
-	textIndexVersion = 1,
+	version = 1,
 	weights = {name = 10, txt = 3} 
 } )
 print('\nCreating text search index: ' .. index)
@@ -40,9 +40,9 @@ local res = col:find({['$text'] = {['$search'] = 'berry'}})
 printResult(res)
 
 print('\nRetrieving index: ')
-printResult(col:findIndexes(index))
+printResult(col:list_indexes(index))
 
-print('\nRemoving index: ' .. tostring(col:dropIndex(index) == nil))
+print('\nRemoving index: ' .. tostring(col:drop_index(index) == nil))
 
 print('\nRemoving data.')
 col:drop()
