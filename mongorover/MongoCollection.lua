@@ -274,7 +274,7 @@ local MongoCollection = {__mode="k"}
   -- See the MongoDB documentation for a full list of supported options by
 	-- server version.
 	-- @treturn string index name
-	function MongoCollection:createIndex(keys, options)
+	function MongoCollection:create_index(keys, options)
 	    return self.collection_t:collection_create_index(luaBSONObjects, keys, options)
 	end
 
@@ -284,7 +284,7 @@ local MongoCollection = {__mode="k"}
 	-- Example usage at @{indexing.lua}.
 	-- @param index string name or original table with indexed fields and their
 	-- corresponding types.
-	function MongoCollection:dropIndex(index)
+	function MongoCollection:drop_index(index)
 	    return self.collection_t:collection_drop_index(luaBSONObjects, index)
 	end
 
@@ -292,8 +292,8 @@ local MongoCollection = {__mode="k"}
 	-- Get a cursor over the index documents for this collection.
 	-- Example usage at @{indexing.lua}.
 	-- @return A @{MongoCursor} with results.
-	function MongoCollection:findIndexes()
-		local cursor_t = self.collection_t:collection_find_indexes(luaBSONObjects)
+	function MongoCollection:list_indexes()
+		local cursor_t = self.collection_t:collection_list_indexes(luaBSONObjects)
 		return MongoCursor(self, cursor_t)
 	end
 
