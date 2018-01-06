@@ -34,6 +34,28 @@ lua_pushinteger_compat(lua_State *L,
 #endif
 }
 
+bool
+lua_isinteger_compat(lua_State *L,
+                     int index)
+{
+#if LUA_VERSION_NUM >= 503
+    return lua_isinteger(L, index);
+#else
+    return lua_isnumber(L, index);
+#endif
+}
+
+int
+lua_tointeger_compat(lua_State *L,
+                     int index)
+{
+#if LUA_VERSION_NUM >= 503
+    return lua_tointeger(L, index);
+#else
+    return lua_tonumber(L, index);
+#endif
+}
+
 void
 setfuncs_compat(lua_State *L,
                 const struct luaL_Reg *R,

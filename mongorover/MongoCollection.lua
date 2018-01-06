@@ -265,6 +265,39 @@ local MongoCollection = {__mode="k"}
 		return MongoCursor(self, cursor_t)
 	end
 
+	---
+	-- Create an index on any field or combination of fields in the collection.
+	-- Example usage at @{indexing.lua}.
+	-- @tparam table keys A table where the key is the field and value is the
+	-- corresponding index type.
+	-- @tparam table options Options for the index (e.g. name, unique, etc.).
+  -- See the MongoDB documentation for a full list of supported options by
+	-- server version.
+	-- @treturn string index name
+	function MongoCollection:create_index(keys, options)
+	    return self.collection_t:collection_create_index(luaBSONObjects, keys, options)
+	end
+
+	---
+	-- Drops the specified index on this collection. Raises an error if
+	-- unsuccessful.
+	-- Example usage at @{indexing.lua}.
+	-- @param index string name or original table with indexed fields and their
+	-- corresponding types.
+	function MongoCollection:drop_index(index)
+	    return self.collection_t:collection_drop_index(luaBSONObjects, index)
+	end
+
+	---
+	-- Get a cursor over the index documents for this collection.
+	-- Example usage at @{indexing.lua}.
+	-- @return A @{MongoCursor} with results.
+	function MongoCollection:list_indexes()
+		local cursor_t = self.collection_t:collection_list_indexes(luaBSONObjects)
+		return MongoCursor(self, cursor_t)
+	end
+
+
 local metatable = {
 	__index = MongoCollection,
 	__call = function(table, ...) 
